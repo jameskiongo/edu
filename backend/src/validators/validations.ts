@@ -44,7 +44,8 @@ export const verifyPasswordChangeSchema = z.object({
 });
 
 export const registerSchema = z.object({
-	name: nameSchema,
+	firstName: nameSchema,
+	lastName: nameSchema,
 	email: emailSchema,
 	password: passwordSchema,
 	phoneNumber: phoneSchema,
@@ -57,7 +58,8 @@ export const loginSchema = z.object({
 
 export const updateProfileSchema = z
 	.object({
-		name: z.string().optional(),
+		firstName: z.string().optional(),
+		lastName: z.string().optional(),
 		image: z
 			.string()
 			.url("Image must be a valid URL")
@@ -65,9 +67,15 @@ export const updateProfileSchema = z
 			.optional()
 			.or(z.literal("")),
 	})
-	.refine((data) => data.name !== undefined || data.image !== undefined, {
-		message: "At least one field (name or image) must be provided",
-	});
+	.refine(
+		(data) =>
+			data.firstName !== undefined ||
+			data.lastName !== undefined ||
+			data.image !== undefined,
+		{
+			message: "At least one field (name or image) must be provided",
+		},
+	);
 
 export const otpSchema = z.object({
 	userId: z.coerce.number().int().positive("Valid user ID is required"),

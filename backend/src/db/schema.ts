@@ -10,7 +10,8 @@ import {
 
 export const users = pgTable("users", {
 	id: serial("id").primaryKey(),
-	name: varchar("name").notNull(),
+	firstName: varchar("first_name").notNull(),
+	lastName: varchar("last_name").notNull(),
 	email: varchar("email", { length: 255 }).notNull().unique(),
 	image: varchar("image"),
 	password: varchar("password", { length: 255 }).notNull(),
