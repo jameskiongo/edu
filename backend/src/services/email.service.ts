@@ -1,0 +1,113 @@
+import dotenv from "dotenv";
+import nodemailer from "nodemailer";
+
+dotenv.config();
+
+const transporter = nodemailer.createTransport({
+	host: process.env.SMTP_HOST,
+	port: parseInt(process.env.SMTP_PORT || "587"),
+	secure: false,
+	requireTLS: true,
+	auth: {
+		user: process.env.SMTP_USER,
+		pass: process.env.SMTP_PASS,
+	},
+	greetingTimeout: 10000,
+	connectionTimeout: 10000,
+	socketTimeout: 10000,
+});
+
+function emailTemplate(title: string, message: string, code: string) {
+	return `
+  <div style="font-family: Arial, Helvetica, sans-serif; background:#f9fafb; padding:40px 0;">
+    <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;padding:40px;border:1px solid #eee;">
+      
+      <h2 style="margin-top:0;color:#111;font-size:24px;">${title}</h2>
+
+      <p style="color:#555;font-size:16px;line-height:1.6;">
+        ${message}
+      </p>
+
+      <div style="text-align:center;margin:30px 0;">
+        <span style="
+          display:inline-block;
+          background:#fff;
+          color:#000;
+          padding:14px 26px;
+          font-size:28px;
+          letter-spacing:6px;
+          border-radius:8px;
+          font-weight:bold;
+        ">
+          ${code}
+        </span>
+      </div>
+
+      <p style="color:#666;font-size:14px;">
+        This code will expire in <strong>10 minutes</strong>.
+      </p>
+
+      <hr style="border:none;border-top:1px solid #eee;margin:30px 0;" />
+
+      <p style="color:#999;font-size:12px;text-align:center;">
+        If you didn’t request this email, you can safely ignore it.
+      </p>
+
+    </div>
+  </div>
+  `;
+}
+
+export class EmailService {
+	static async sendVerificationEmail(
+		email: string,
+		code: string,
+	): Promise<void> {
+		await transporter.sendMail({
+			from: `"MyApp" <${process.env.SMTP_USER}>`,
+			to: email,
+			subject: "Verify Your Email",
+			html: emailTemplate(
+				"Verify Your Email",
+				"Welcome! Please use the verification code below to activate your account.",
+				code,
+			),
+		});
+	}
+
+	static async sendPasswordResetEmail(
+		email: string,
+		code: string,
+	): Promise<void> {
+		await transporter.sendMail({
+			from: `"MyApp" <${process.env.SMTP_USER}>`,
+			to: email,
+			subject: "Password Reset Request",
+			html: emailTemplate(
+				"Password Reset",
+				"You requested to reset your password. Use the code below to continue.",
+				code,
+			),
+		});
+	}
+
+	static async sendEmailOtp(email: string, code: string): Promise<boolean> {
+		try {
+			await transporter.sendMail({
+				from: `"MyApp" <${process.env.SMTP_USER}>`,
+				to: email,
+				subject: "Login Verification Code",
+				html: emailTemplate(
+					"Login Verification",
+					"Use the code below to complete your login.",
+					code,
+				),
+			});
+
+			return true;
+		} catch (error) {
+			console.error("Email OTP error:", error);
+			return false;
+		}
+	}
+}
