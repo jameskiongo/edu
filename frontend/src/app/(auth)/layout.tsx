@@ -3,11 +3,9 @@ import Link from "next/link";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
-  title: string;
-  subtitle: string;
 }
 
-export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
+export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="flex min-h-screen bg-secondary">
       <div className="flex w-full flex-col bg-background/95 backdrop-blur-sm">
@@ -23,8 +21,10 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
         <div className="flex flex-1 items-center justify-center p-6 sm:p-12">
           <div className="w-full max-w-md space-y-8">
             <div className="space-y-2 text-center">
-              <h2 className="text-2xl font-bold text-foreground">{title}</h2>
-              <p className="text-muted-foreground">{subtitle}</p>
+              <h2 className="text-2xl font-bold text-foreground">
+                Welcome Back
+              </h2>
+              {/* <p className="text-muted-foreground"></p> */}
             </div>
             {children}
           </div>

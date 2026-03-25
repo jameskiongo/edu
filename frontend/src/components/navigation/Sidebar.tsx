@@ -89,15 +89,17 @@ export function Sidebar() {
             <div
               className={cn("flex gap-2", collapsed ? "flex-col" : "flex-row")}
             >
-              <button
+              <a
+                href="/login"
                 className={cn(
                   "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 )}
               >
                 <LogInIcon className="size-5 shrink-0" />
                 {!collapsed && <span>Login</span>}
-              </button>
-              <button
+              </a>
+              <a
+                href="/register"
                 type="button"
                 className={cn(
                   "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
@@ -105,7 +107,7 @@ export function Sidebar() {
               >
                 <UserPlus className="size-5 shrink-0" />
                 {!collapsed && <span>Register</span>}
-              </button>
+              </a>
             </div>
           ) : (
             <div className="flex items-center gap-3 rounded-lg bg-secondary/50 p-3">
