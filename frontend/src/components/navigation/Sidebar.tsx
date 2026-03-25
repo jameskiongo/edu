@@ -1,13 +1,15 @@
 "use client";
 import {
-  BarChart3,
   BookOpen,
   Calendar,
   ChevronLeft,
+  CompassIcon,
   GraduationCap,
   LayoutDashboard,
+  LogInIcon,
   Trophy,
   UserIcon,
+  UserPlus,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,16 +18,17 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Overview", href: "/" },
-  { icon: BookOpen, label: "Courses", href: "#" },
+  { icon: LayoutDashboard, label: "Dashboard", href: "/" },
+  { icon: CompassIcon, label: "Browse Courses", href: "#" },
+  { icon: BookOpen, label: "My Courses", href: "#" },
   { icon: Calendar, label: "Schedule", href: "#" },
   { icon: Trophy, label: "Certificates", href: "#" },
-  { icon: BarChart3, label: "Analytics", href: "#" },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   return (
     <div
@@ -43,8 +46,9 @@ export function Sidebar() {
             <span className="text-lg font-semibold text-foreground">App</span>
           )}
         </div>
-        {/* FIX: Fix the collapsed icon  */}
+        {/* FIX: Fix the collapsed icon hover  */}
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
@@ -79,16 +83,43 @@ export function Sidebar() {
           );
         })}
       </nav>
-
       <div className="border-t border-border p-3">
-        <div className="mt-3 flex items-center gap-3 rounded-lg bg-secondary/50 p-3">
-          <UserIcon className="size-10" />
-          {!collapsed && (
-            <div className="flex-1 overflow-hidden">
-              <p className="truncate text-sm font-medium text-foreground">
-                Jane Doe
-              </p>
-              <p className="truncate text-xs text-muted-foreground">Student</p>
+        <div className="mt-3">
+          {!isLoggedIn ? (
+            <div
+              className={cn("flex gap-2", collapsed ? "flex-col" : "flex-row")}
+            >
+              <button
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                )}
+              >
+                <LogInIcon className="size-5 shrink-0" />
+                {!collapsed && <span>Login</span>}
+              </button>
+              <button
+                type="button"
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                )}
+              >
+                <UserPlus className="size-5 shrink-0" />
+                {!collapsed && <span>Register</span>}
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 rounded-lg bg-secondary/50 p-3">
+              <UserIcon className="size-10" />
+              {!collapsed && (
+                <div className="flex-1 overflow-hidden">
+                  <p className="truncate text-sm font-medium text-foreground">
+                    Jane Doe
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    Student
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
