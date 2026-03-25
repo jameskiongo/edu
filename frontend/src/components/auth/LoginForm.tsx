@@ -1,27 +1,18 @@
 "use client";
-
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLoginForm } from "@/hooks/auth/useLoginForm";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsLoading(false);
-  };
+  const formik = useLoginForm();
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={formik.handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <div className="relative">
@@ -30,12 +21,16 @@ export function LoginForm() {
             id="email"
             type="email"
             placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            name="email"
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             className="pl-10"
-            required
           />
         </div>
+        {formik.touched.email && formik.errors.email && (
+          <p className="mt-1 text-xs text-red-600">{formik.errors.email}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -54,10 +49,11 @@ export function LoginForm() {
             id="password"
             type={showPassword ? "text" : "password"}
             placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             className="pl-10 pr-10"
-            required
           />
           <button
             type="button"
@@ -71,9 +67,13 @@ export function LoginForm() {
             )}
           </button>
         </div>
+        {formik.touched.password && formik.errors.password && (
+          <p className="mt-1 text-xs text-red-600">{formik.errors.password}</p>
+        )}
       </div>
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? (
+
+      <Button type="submit" className="w-full" disabled={formik.isSubmitting}>
+        {formik.isSubmitting ? (
           <>
             <Loader2 className="mr-2 size-4 animate-spin" />
             Signing in...

@@ -1,6 +1,7 @@
 "use client";
 
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/navigation/Sidebar";
@@ -36,6 +37,7 @@ export default function RootLayout({
             </div>
           )}
           <div className="flex flex-1 flex-col overflow-auto">{children}</div>
+          <Toaster position="top-center" />
         </div>
       </body>
     </html>

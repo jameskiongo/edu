@@ -1,4 +1,4 @@
-import type { Course } from "@/components/courses/CourseCard";
+import type { Course } from "@/types/courses/course";
 
 export async function getCourses(): Promise<Course[]> {
   const res = await fetch("/api/courses");

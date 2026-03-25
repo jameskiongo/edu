@@ -1,10 +1,10 @@
 import type { AxiosError, AxiosResponse } from "axios";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import type z from "zod";
-import { authApi } from "@/lib/api";
-import { loginSchema } from "@/lib/Validations";
-import type { ErrorResponse, LoginApiResponse } from "@/types/auth";
+import { authApi } from "@/lib/auth";
+import { loginSchema } from "@/lib/validators";
+import type { ErrorResponse, LoginApiResponse } from "@/types/auth/auth";
 import { useAppForm } from "./useAppForm";
 
 export function useLoginForm() {
@@ -42,9 +42,10 @@ export function useLoginForm() {
           }, 1500);
         }
       } catch (error) {
-        const messageError = error as AxiosError<ErrorResponse>;
-        const message =
-          messageError?.response?.data?.error || "Something went wrong";
+        const axiosError = error as AxiosError<ErrorResponse>;
+        const data = axiosError?.response?.data;
+
+        const message = data?.error || data?.message || "Something went wrong";
         toast.error(message);
       }
     },
