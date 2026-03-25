@@ -1,6 +1,9 @@
-import type { Metadata } from "next";
+"use client";
+
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { usePathname } from "next/navigation";
+import { Sidebar } from "@/components/navigation/Sidebar";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -11,42 +14,30 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
 });
 
-export const metadata: Metadata = {
-  title: "LearnHub - Online Learning Dashboard",
-  description:
-    "Track your progress, manage courses, and achieve your learning goals",
-  generator: "v0.app",
-  icons: {
-    icon: [
-      {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
-    apple: "/apple-icon.png",
-  },
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  const noSidebar = ["/login", "/register"];
+  const showSidebar = !noSidebar.includes(pathname);
   return (
     <html
       lang="en"
       className={`${geist.variable} ${geistMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="font-sans antialiased">{children}</body>
+      <body className="h-screen flex flex-col font-sans antialiased">
+        <div className="flex flex-1 overflow-hidden">
+          {showSidebar && (
+            <div className="hidden sticky top-0 lg:block">
+              <Sidebar />
+            </div>
+          )}
+          <div className="flex flex-1 flex-col overflow-auto">{children}</div>
+        </div>
+      </body>
     </html>
   );
 }
