@@ -12,7 +12,8 @@ export interface ApiResponse<T = unknown> {
 export type AuthRequest<P = {}, B = {}, Q = {}> = Request<P, {}, B, Q>;
 
 export interface RegisterBody {
-	name: string;
+	firstName: string;
+	lastName: string;
 	email: string;
 	password: string;
 	phoneNumber: string;
@@ -87,12 +88,14 @@ export interface PasswordChangeResponseData {
 }
 
 export interface UpdateProfileBody {
-	name?: string;
+	firstName: string;
+	lastName: string;
 	image?: string;
 }
 
 export interface UserProfile {
-	name: string;
+	firstName: string;
+	lastName: string;
 	email: string;
 	image: string | null;
 }

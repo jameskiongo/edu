@@ -1,18 +1,17 @@
 import { Router } from "express";
-import { UserController } from "../contollers/user.controllers";
+import { catchAsync } from "../controllers/base.controller";
+import { userController } from "../controllers/user.controller";
 import { authenticate, validate } from "../middlewares/auth.middleware";
 import { updateProfileSchema } from "../validators/validations";
 
 const router = Router();
 
-router.use(authenticate);
-
-router.get("/profile", UserController.getProfile);
-
+router.get("/profile", authenticate, catchAsync(userController.getProfile));
 router.patch(
 	"/profile",
+	authenticate,
 	validate(updateProfileSchema),
-	UserController.updateProfile,
+	catchAsync(userController.updateProfile),
 );
 
 export default router;

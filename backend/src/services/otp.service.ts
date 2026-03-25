@@ -1,10 +1,11 @@
 import bcrypt from "bcrypt";
 import { and, eq, gt } from "drizzle-orm";
-import { db } from "../db/db.js";
-import { otpCodes, users } from "../db/schema.js";
-import { EmailService } from "./email.service.js";
-import { type SMSResult, SMSService } from "./sms.service.js";
-import { TokenService } from "./token.service.js";
+import { db } from "../db/db";
+import { otpCodes, users } from "../db/schema";
+import { BadRequestError, NotFoundError } from "../utils/errors";
+import { type EmailService, emailService } from "./email.service";
+import { type SMSResult, type SMSService, smsService } from "./sms.service";
+import { type TokenService, tokenService } from "./token.service";
 
 export interface OTPResult {
 	success: boolean;
@@ -14,18 +15,24 @@ export interface OTPResult {
 }
 
 export class OtpService {
-	private static readonly SALT_ROUNDS = 12;
-	private static readonly OTP_EXPIRY_MINUTES = 10;
+	private readonly SALT_ROUNDS = 12;
+	private readonly OTP_EXPIRY_MINUTES = 10;
 
-	static async sendOTP(
+	constructor(
+		private emailService: EmailService,
+		private smsService: SMSService,
+		private tokenService: TokenService,
+	) {}
+
+	async sendOTP(
 		userId: number,
 		phoneNumber: string,
 		email: string,
 		purpose: "login" | "verification" | "password_reset" | "password_change",
 	): Promise<OTPResult> {
-		const code = TokenService.generateOTP();
+		const code = this.tokenService.generateOTP();
 		const expiresAt = new Date(
-			Date.now() + OtpService.OTP_EXPIRY_MINUTES * 60 * 1000,
+			Date.now() + this.OTP_EXPIRY_MINUTES * 60 * 1000,
 		);
 
 		await db
@@ -37,13 +44,17 @@ export class OtpService {
 			.insert(otpCodes)
 			.values({
 				userId,
-				code: await bcrypt.hash(code, OtpService.SALT_ROUNDS),
+				code: await bcrypt.hash(code, this.SALT_ROUNDS),
 				purpose,
 				expiresAt,
 			})
 			.returning({ id: otpCodes.id });
+
 		if (purpose === "password_change" || purpose === "password_reset") {
-			const emailSent: boolean = await EmailService.sendEmailOtp(email, code);
+			const emailSent: boolean = await this.emailService.sendEmailOtp(
+				email,
+				code,
+			);
 
 			if (emailSent) {
 				return {
@@ -58,10 +69,10 @@ export class OtpService {
 				.set({ used: true })
 				.where(eq(otpCodes.id, otpRecord.id));
 
-			throw new Error("Failed to send OTP via email");
+			throw new BadRequestError("Failed to send OTP via email");
 		}
 
-		const smsResult: SMSResult = await SMSService.sendOTPFetch(
+		const smsResult: SMSResult = await this.smsService.sendOTPFetch(
 			phoneNumber,
 			code,
 		);
@@ -78,7 +89,10 @@ export class OtpService {
 			`SMS failed for user ${userId}: ${smsResult.message}. Falling back to email.`,
 		);
 
-		const emailSent: boolean = await EmailService.sendEmailOtp(email, code);
+		const emailSent: boolean = await this.emailService.sendEmailOtp(
+			email,
+			code,
+		);
 
 		if (emailSent) {
 			return {
@@ -96,10 +110,10 @@ export class OtpService {
 			.set({ used: true })
 			.where(eq(otpCodes.id, otpRecord.id));
 
-		throw new Error("Failed to send OTP via both SMS and email");
+		throw new BadRequestError("Failed to send OTP via both SMS and email");
 	}
 
-	static async verifyOTP(
+	async verifyOTP(
 		userId: number,
 		code: string,
 		purpose:
@@ -123,7 +137,7 @@ export class OtpService {
 			.then((rows) => rows[0]);
 
 		if (!otpRecord) {
-			throw new Error("Invalid or expired OTP");
+			throw new BadRequestError("Invalid or expired OTP");
 		}
 
 		if ((otpRecord.attempts ?? 0) >= 3) {
@@ -131,7 +145,7 @@ export class OtpService {
 				.update(otpCodes)
 				.set({ used: true })
 				.where(eq(otpCodes.id, otpRecord.id));
-			throw new Error("Too many attempts. Please request a new OTP.");
+			throw new BadRequestError("Too many attempts. Please request a new OTP.");
 		}
 
 		await db
@@ -141,7 +155,7 @@ export class OtpService {
 
 		const isValid = await bcrypt.compare(code, otpRecord.code);
 		if (!isValid) {
-			throw new Error("Invalid OTP");
+			throw new BadRequestError("Invalid OTP");
 		}
 
 		await db
@@ -159,7 +173,7 @@ export class OtpService {
 		return { verified: true };
 	}
 
-	static async resendOTP(
+	async resendOTP(
 		userId: number,
 		purpose: "login" | "verification" | "password_change",
 	): Promise<OTPResult> {
@@ -171,21 +185,21 @@ export class OtpService {
 			.then((row) => row[0]);
 
 		if (!user) {
-			throw new Error("User not found");
+			throw new NotFoundError("User not found");
 		}
 
 		if (!user.isActive) {
-			throw new Error("Account is deactivated");
+			throw new BadRequestError("Account is deactivated");
 		}
 
 		if (purpose === "login" && !user.isVerified) {
-			throw new Error(
+			throw new BadRequestError(
 				"Account not verified. Please complete registration first",
 			);
 		}
 
 		if (purpose === "verification" && user.isVerified) {
-			throw new Error("Account is already verified");
+			throw new BadRequestError("Account is already verified");
 		}
 
 		const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
@@ -207,9 +221,15 @@ export class OtpService {
 			const secondsLeft = Math.ceil(
 				(recentOTP.createdAt.getTime() + 60000 - Date.now()) / 1000,
 			);
-			throw new Error(`Please wait ${secondsLeft} seconds`);
+			throw new BadRequestError(`Please wait ${secondsLeft} seconds`);
 		}
 
-		return OtpService.sendOTP(userId, user.phoneNumber, user.email, purpose);
+		return this.sendOTP(userId, user.phoneNumber, user.email, purpose);
 	}
 }
+
+export const otpService = new OtpService(
+	emailService,
+	smsService,
+	tokenService,
+);

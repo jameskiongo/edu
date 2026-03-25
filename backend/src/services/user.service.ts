@@ -1,11 +1,12 @@
 import { eq } from "drizzle-orm";
 import { db } from "../db/db";
-import { users } from "../db/schema.js";
+import { users } from "../db/schema";
+import { BadRequestError, NotFoundError } from "../utils/errors";
 
 export class UserService {
-	static async updateProfile(
+	async updateProfile(
 		userId: number,
-		data: { name?: string; image?: string },
+		data: { firstName?: string; lastName?: string; image?: string },
 	) {
 		const existingUser = await db
 			.select()
@@ -15,19 +16,22 @@ export class UserService {
 			.then((rows) => rows[0]);
 
 		if (!existingUser) {
-			throw new Error("User not found");
+			throw new NotFoundError("User not found");
 		}
 
 		if (!existingUser.isActive) {
-			throw new Error("Account is deactivated");
+			throw new BadRequestError("Account is deactivated");
 		}
 
 		const updateData: Partial<typeof users.$inferInsert> = {
 			updatedAt: new Date(),
 		};
 
-		if (data.name !== undefined) {
-			updateData.name = data.name.trim();
+		if (data.firstName !== undefined) {
+			updateData.firstName = data.firstName.trim();
+		}
+		if (data.lastName !== undefined) {
+			updateData.lastName = data.lastName.trim();
 		}
 
 		if (data.image !== undefined) {
@@ -40,7 +44,8 @@ export class UserService {
 			.where(eq(users.id, userId))
 			.returning({
 				id: users.id,
-				name: users.name,
+				firstName: users.firstName,
+				lastName: users.lastName,
 				email: users.email,
 				image: users.image,
 				phoneNumber: users.phoneNumber,
@@ -51,11 +56,12 @@ export class UserService {
 		return updatedUser;
 	}
 
-	static async getProfile(userId: number) {
+	async getProfile(userId: number) {
 		const user = await db
 			.select({
 				id: users.id,
-				name: users.name,
+				firstName: users.firstName,
+				lastName: users.lastName,
 				email: users.email,
 				image: users.image,
 				phoneNumber: users.phoneNumber,
@@ -70,8 +76,10 @@ export class UserService {
 			.then((rows) => rows[0]);
 
 		if (!user) {
-			throw new Error("User not found");
+			throw new NotFoundError("User not found");
 		}
 		return user;
 	}
 }
+
+export const userService = new UserService();

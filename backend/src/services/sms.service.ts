@@ -12,12 +12,9 @@ export interface SMSResult {
 }
 
 export class SMSService {
-	static async sendOTPFetch(
-		phoneNumber: string,
-		code: string,
-	): Promise<SMSResult> {
+	async sendOTPFetch(phoneNumber: string, code: string): Promise<SMSResult> {
 		try {
-			const formattedNumber = SMSService.formatPhoneNumber(phoneNumber);
+			const formattedNumber = this.formatPhoneNumber(phoneNumber);
 			const username = process.env.AT_USERNAME!;
 			const apiKey = process.env.AT_API_KEY!;
 
@@ -52,9 +49,6 @@ export class SMSService {
 				const recipient = data.SMSMessageData.Recipients[0];
 				const statusCode = recipient.statusCode;
 				const status = recipient.status;
-
-				console.log("SMS Status Code:", statusCode);
-				console.log("SMS Status:", status);
 
 				if (statusCode === 406 || status === "UserInBlacklist") {
 					return {
@@ -110,7 +104,7 @@ export class SMSService {
 		}
 	}
 
-	private static formatPhoneNumber(phoneNumber: string): string {
+	private formatPhoneNumber(phoneNumber: string): string {
 		let cleaned = phoneNumber.replace(/[\s\-()]/g, "");
 		if (cleaned.startsWith("00")) {
 			cleaned = "+" + cleaned.substring(2);
@@ -126,3 +120,5 @@ export class SMSService {
 		return cleaned;
 	}
 }
+
+export const smsService = new SMSService();

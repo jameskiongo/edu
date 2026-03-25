@@ -2,19 +2,23 @@ import { and, eq, gt } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import { db } from "../db/db";
 import { refreshTokens } from "../db/schema";
+import { UnauthorizedError } from "../utils/errors";
+
 export interface Tokens {
 	accessToken: string;
 	refreshToken: string;
 }
+
 export class TokenService {
-	static generateOTP(): string {
+	generateOTP(): string {
 		return Math.floor(100000 + Math.random() * 900000).toString();
 	}
-	static generateTokens(userId: number): Tokens {
+
+	generateTokens(userId: number): Tokens {
 		const accessToken = jwt.sign(
 			{ userId, type: "access" },
 			process.env.JWT_SECRET!,
-			{ expiresIn: "1m" },
+			{ expiresIn: "15m" }, // Changed from 1m for better UX, usually it's around 15m
 		);
 
 		const refreshToken = jwt.sign(
@@ -26,26 +30,36 @@ export class TokenService {
 		return { accessToken, refreshToken };
 	}
 
-	static verifyAccessToken(token: string): { userId: number } {
-		const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-			userId: number;
-			type: string;
-		};
-		if (decoded.type !== "access") throw new Error("Invalid token type");
-		return { userId: decoded.userId };
+	verifyAccessToken(token: string): { userId: number } {
+		try {
+			const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+				userId: number;
+				type: string;
+			};
+			if (decoded.type !== "access")
+				throw new UnauthorizedError("Invalid token type");
+			return { userId: decoded.userId };
+		} catch (error) {
+			throw new UnauthorizedError("Invalid or expired access token");
+		}
 	}
 
-	static verifyRefreshToken(token: string): { userId: number } {
-		const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as {
-			userId: number;
-			type: string;
-		};
-		if (decoded.type !== "refresh") throw new Error("Invalid token type");
-		return { userId: decoded.userId };
+	verifyRefreshToken(token: string): { userId: number } {
+		try {
+			const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as {
+				userId: number;
+				type: string;
+			};
+			if (decoded.type !== "refresh")
+				throw new UnauthorizedError("Invalid token type");
+			return { userId: decoded.userId };
+		} catch (error) {
+			throw new UnauthorizedError("Invalid or expired refresh token");
+		}
 	}
 
-	static async refreshTokens(refreshToken: string): Promise<Tokens> {
-		const { userId } = TokenService.verifyRefreshToken(refreshToken);
+	async refreshTokens(refreshToken: string): Promise<Tokens> {
+		const { userId } = this.verifyRefreshToken(refreshToken);
 
 		const storedToken = await db
 			.select()
@@ -61,16 +75,19 @@ export class TokenService {
 			.then((row) => row[0]);
 
 		if (!storedToken) {
-			throw new Error("Invalid refresh token");
+			throw new UnauthorizedError("Refresh token not found or revoked");
 		}
 
+		// Revoke the old refresh token
 		await db
 			.update(refreshTokens)
 			.set({ revoked: true })
 			.where(eq(refreshTokens.id, storedToken.id));
 
-		const tokens = TokenService.generateTokens(userId);
+		const tokens = this.generateTokens(userId);
 		const decoded = jwt.decode(tokens.refreshToken) as { exp: number };
+
+		// Save new refresh token
 		await db.insert(refreshTokens).values({
 			userId,
 			token: tokens.refreshToken,
@@ -80,3 +97,5 @@ export class TokenService {
 		return tokens;
 	}
 }
+
+export const tokenService = new TokenService();

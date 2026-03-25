@@ -59,10 +59,7 @@ function emailTemplate(title: string, message: string, code: string) {
 }
 
 export class EmailService {
-	static async sendVerificationEmail(
-		email: string,
-		code: string,
-	): Promise<void> {
+	async sendVerificationEmail(email: string, code: string): Promise<void> {
 		await transporter.sendMail({
 			from: `"MyApp" <${process.env.SMTP_USER}>`,
 			to: email,
@@ -75,10 +72,7 @@ export class EmailService {
 		});
 	}
 
-	static async sendPasswordResetEmail(
-		email: string,
-		code: string,
-	): Promise<void> {
+	async sendPasswordResetEmail(email: string, code: string): Promise<void> {
 		await transporter.sendMail({
 			from: `"MyApp" <${process.env.SMTP_USER}>`,
 			to: email,
@@ -91,7 +85,7 @@ export class EmailService {
 		});
 	}
 
-	static async sendEmailOtp(email: string, code: string): Promise<boolean> {
+	async sendEmailOtp(email: string, code: string): Promise<boolean> {
 		try {
 			await transporter.sendMail({
 				from: `"MyApp" <${process.env.SMTP_USER}>`,
@@ -111,3 +105,5 @@ export class EmailService {
 		}
 	}
 }
+
+export const emailService = new EmailService();

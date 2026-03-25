@@ -29,6 +29,13 @@
       "when": 1772716468633,
       "tag": "0003_sharp_morbius",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1774460785006,
+      "tag": "0004_flat_vindicator",
+      "breakpoints": true
     }
   ]
 }

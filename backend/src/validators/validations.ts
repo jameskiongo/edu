@@ -8,26 +8,28 @@ const passwordSchema = z
 		"Password must contain uppercase, lowercase, number and special character",
 	);
 
-const nameSchema = z
-	.string()
+const firstNameSchema = z
+	.string("First name Cannot be empty")
 	.min(2, "Name must be at least 2 characters")
-	.max(100, "Name must be less than 100 characters")
-	.optional();
+	.max(100, "Name must be less than 100 characters");
+const lastNameSchema = z
+	.string("Last name cannot be empty")
+	.min(2, "Name must be at least 2 characters")
+	.max(100, "Name must be less than 100 characters");
 
 const phoneSchema = z
-	.string()
+	.string("Phone number cannot be empty")
 	.regex(
 		/^\+?[1-9]\d{1,14}$/,
 		"Valid phone number with country code is required (e.g., +1234567890)",
 	);
 
 const emailSchema = z
-	.string()
 	.email("Valid email is required")
 	.transform((val) => val.toLowerCase().trim());
 
 const otpCodeSchema = z
-	.string()
+	.string("OTP cannot be empty")
 	.length(6, "Code must be exactly 6 digits")
 	.regex(/^\d+$/, "Code must contain only numbers");
 
@@ -44,8 +46,8 @@ export const verifyPasswordChangeSchema = z.object({
 });
 
 export const registerSchema = z.object({
-	firstName: nameSchema,
-	lastName: nameSchema,
+	firstName: firstNameSchema,
+	lastName: lastNameSchema,
 	email: emailSchema,
 	password: passwordSchema,
 	phoneNumber: phoneSchema,
@@ -61,7 +63,6 @@ export const updateProfileSchema = z
 		firstName: z.string().optional(),
 		lastName: z.string().optional(),
 		image: z
-			.string()
 			.url("Image must be a valid URL")
 			.max(500, "Image URL too long")
 			.optional()

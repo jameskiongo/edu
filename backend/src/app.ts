@@ -2,6 +2,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import helmet from "helmet";
+import { errorHandler } from "./middlewares/error.middleware";
 import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
 
@@ -27,17 +28,7 @@ app.get("/health", (_, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 
-app.use(
-	(
-		err: any,
-		_: express.Request,
-		res: express.Response,
-		next: express.NextFunction,
-	) => {
-		console.error(err.stack);
-		res.status(500).json({ error: "Something went wrong!" });
-	},
-);
+app.use(errorHandler);
 
 app.use((_, res) => {
 	res.status(404).json({ error: "Route not found" });
