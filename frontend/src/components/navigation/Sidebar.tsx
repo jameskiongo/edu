@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/" },
-  { icon: CompassIcon, label: "Browse Courses", href: "#" },
+  { icon: CompassIcon, label: "Browse Courses", href: "/courses" },
   { icon: BookOpen, label: "My Courses", href: "#" },
   { icon: Calendar, label: "Schedule", href: "#" },
   { icon: Trophy, label: "Certificates", href: "#" },

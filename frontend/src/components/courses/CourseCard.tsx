@@ -1,29 +1,9 @@
-import { ArrowUpRight, BookOpen, Clock, Star, Users } from "lucide-react";
+import { ArrowUpRight, BookOpen, Clock, Star, User, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-
-export interface Course {
-  id: string;
-  title: string;
-  description: string;
-  thumbnail: string;
-  instructor: {
-    name: string;
-    avatar: string;
-  };
-  category: string;
-  level: string;
-  duration: string;
-  rating: number;
-  reviewCount: number;
-  studentsEnrolled: number;
-  lessonsCount: number;
-  price: number;
-  isFree?: boolean;
-  isEnrolled?: boolean;
-}
+import type { Course } from "@/types/courses/course";
 
 interface CourseCardProps {
   course: Course;
@@ -35,11 +15,11 @@ export function CourseCard({ course }: CourseCardProps) {
       {/* Thumbnail */}
       <div className="relative aspect-video overflow-hidden bg-secondary">
         <img
-          src={course.thumbnail}
-          alt={course.title}
+          src={course.thumbnailUrl || ""}
+          alt={course.title || ""}
           className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="absolute inset-0 bg-linear-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
         {/* Overlay button */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -60,7 +40,7 @@ export function CourseCard({ course }: CourseCardProps) {
         {/* Level Badge */}
         <Badge
           variant="outline"
-          className="absolute right-3 top-3 border-primary/50 bg-primary/10 text-primary backdrop-blur-sm"
+          className="absolute right-3 top-3 border-primary/50 bg-primary text-secondary backdrop-blur-sm"
         >
           {course.level}
         </Badge>
@@ -78,31 +58,32 @@ export function CourseCard({ course }: CourseCardProps) {
           {course.description}
         </p>
 
-        {/* Instructor */}
         <div className="flex items-center gap-2">
           <Avatar className="size-6">
-            <AvatarImage src={course.instructor.avatar} />
-            <AvatarFallback>{course.instructor.name[0]}</AvatarFallback>
+            <AvatarImage src={course.thumbnailUrl || ""} />
+            {/* <AvatarFallback>{course.instructor.name[0]}</AvatarFallback> */}
+            <AvatarFallback>
+              <User />
+            </AvatarFallback>
           </Avatar>
           <span className="text-sm text-muted-foreground">
-            by <span className="text-foreground">{course.instructor.name}</span>
+            by <span className="text-foreground">James</span>
           </span>
         </div>
 
-        {/* Stats */}
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <Star className="size-3.5 fill-warning text-warning" />
             <span className="text-foreground font-medium">{course.rating}</span>
-            <span>({course.reviewCount})</span>
+            <span>({course.rating})</span>
           </div>
           <div className="flex items-center gap-1">
             <Users className="size-3.5" />
-            <span>{course.studentsEnrolled.toLocaleString()}</span>
+            <span>{course.enrollmentCount}</span>
           </div>
           <div className="flex items-center gap-1">
             <BookOpen className="size-3.5" />
-            <span>{course.lessonsCount} lessons</span>
+            <span>11 lessons</span>
           </div>
         </div>
 
@@ -110,21 +91,9 @@ export function CourseCard({ course }: CourseCardProps) {
         <div className="flex items-center justify-between pt-2 border-t border-border">
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Clock className="size-4" />
-            <span>{course.duration}</span>
+            <span>{course.durationHours}</span>
           </div>
-          <div className="text-right">
-            {course.isFree ? (
-              <span className="text-primary font-semibold">Free</span>
-            ) : course.isEnrolled ? (
-              <Badge variant="secondary" className="bg-primary/10 text-primary">
-                Enrolled
-              </Badge>
-            ) : (
-              <span className="text-foreground font-semibold">
-                ${course.price}
-              </span>
-            )}
-          </div>
+          <div className="text-right">{course.price}</div>
         </div>
       </div>
     </Card>
