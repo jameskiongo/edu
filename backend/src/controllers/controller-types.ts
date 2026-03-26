@@ -17,6 +17,7 @@ export interface RegisterBody {
 	email: string;
 	password: string;
 	phoneNumber: string;
+	role: "ADMIN" | "TEACHER" | "STUDENT";
 }
 
 export interface LoginBody {

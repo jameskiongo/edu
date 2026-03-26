@@ -21,7 +21,8 @@ export class AuthController extends BaseController {
 
 	register = async (req: Request<{}, {}, RegisterBody>, res: Response) => {
 		this.validate(req);
-		const { firstName, lastName, email, password, phoneNumber } = req.body;
+		const { firstName, lastName, email, password, phoneNumber, role } =
+			req.body;
 
 		const result = await this.authService.register(
 			firstName,
@@ -29,6 +30,7 @@ export class AuthController extends BaseController {
 			email,
 			password,
 			phoneNumber,
+			role,
 		);
 
 		return this.sendResponse(

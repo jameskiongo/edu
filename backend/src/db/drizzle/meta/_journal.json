@@ -43,6 +43,13 @@
       "when": 1774544163936,
       "tag": "0005_odd_mystique",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1774545486609,
+      "tag": "0006_even_mindworm",
+      "breakpoints": true
     }
   ]
 }

@@ -3,7 +3,13 @@ import dotenv from "dotenv";
 import { and, eq, or } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import { db } from "../db/db";
-import { otpCodes, refreshTokens, users } from "../db/schema";
+import {
+	otpCodes,
+	refreshTokens,
+	studentProfiles,
+	teacherProfiles,
+	users,
+} from "../db/schema";
 import {
 	BadRequestError,
 	NotFoundError,
@@ -41,6 +47,7 @@ export class AuthService {
 		email: string,
 		password: string,
 		phoneNumber: string,
+		role: "ADMIN" | "TEACHER" | "STUDENT",
 	): Promise<{
 		userId: number;
 		message: string;
@@ -59,17 +66,28 @@ export class AuthService {
 
 		const hashedPassword = await this.hashPassword(password);
 
-		const [newUser] = await db
-			.insert(users)
-			.values({
-				firstName,
-				lastName,
-				email,
-				password: hashedPassword,
-				phoneNumber,
-				isVerified: false,
-			})
-			.returning();
+		const newUser = await db.transaction(async (tx) => {
+			const [user] = await tx
+				.insert(users)
+				.values({
+					firstName,
+					lastName,
+					email,
+					password: hashedPassword,
+					phoneNumber,
+					role,
+					isVerified: false,
+				})
+				.returning();
+
+			if (role === "TEACHER") {
+				await tx.insert(teacherProfiles).values({ userId: user.id });
+			} else if (role === "STUDENT") {
+				await tx.insert(studentProfiles).values({ userId: user.id });
+			}
+
+			return user;
+		});
 
 		const otpResult: OTPResult = await this.otpService.sendOTP(
 			newUser.id,

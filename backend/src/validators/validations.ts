@@ -51,6 +51,9 @@ export const registerSchema = z.object({
 	email: emailSchema,
 	password: passwordSchema,
 	phoneNumber: phoneSchema,
+	role: z.enum(["ADMIN", "TEACHER", "STUDENT"], {
+		required_error: "Role is required",
+	}),
 });
 
 export const loginSchema = z.object({
