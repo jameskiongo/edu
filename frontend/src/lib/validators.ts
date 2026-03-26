@@ -2,11 +2,13 @@ import { z } from "zod";
 
 export const loginSchema = z.object({
   email: z.email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 6 characters"),
+  password: z
+    .string("Field cannot be empty")
+    .min(8, "Password must be at least 6 characters"),
 });
 
 const passwordSchema = z
-  .string()
+  .string("Field cannot be empty")
   .min(8, "Password must be at least 8 characters")
   .regex(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
@@ -16,11 +18,11 @@ const passwordSchema = z
 export const registerSchema = z
   .object({
     firstName: z
-      .string("First name cannot be empty")
+      .string("Field cannot be empty")
       .min(2, "Name must be at least 2 characters")
       .max(100, "Name must be less than 100 characters"),
     lastName: z
-      .string("Last name cannot be empty")
+      .string("Field cannot be empty")
       .min(2, "Name must be at least 2 characters")
       .max(100, "Name must be less than 100 characters"),
     email: z.email("Please enter a valid email address"),
@@ -32,7 +34,7 @@ export const registerSchema = z
         "Password must contain uppercase, lowercase, number and special character",
       ),
     phoneNumber: z
-      .string("Phone number cannot be empty")
+      .string("Field cannot be empty")
       .regex(
         /^\+?[1-9]\d{1,14}$/,
         "Please enter a valid phone number with country code (e.g., +254712345678)",
@@ -46,7 +48,7 @@ export const registerSchema = z
 
 export const otpSchema = z.object({
   code: z
-    .string("OTP code cannot be empty")
+    .string("Field cannot be empty")
     .length(6, "Code must be exactly 6 digits")
     .regex(/^\d+$/, "Code must contain only numbers"),
 });
@@ -58,7 +60,7 @@ export const forgotPasswordSchema = z.object({
 export const resetPasswordSchema = z
   .object({
     code: z
-      .string("OTP code cannot be empty")
+      .string("Field cannot be empty")
       .length(6, "Code must be exactly 6 digits")
       .regex(/^\d+$/, "Code must contain only numbers"),
     newPassword: passwordSchema,
@@ -71,12 +73,12 @@ export const resetPasswordSchema = z
 
 export const profileSchema = z.object({
   firstName: z
-    .string("First Nqme cannot be empty")
+    .string("Field cannot be empty")
     .min(2, "Name must be at least 2 characters")
     .max(100, "Name must be less than 100 characters")
     .optional(),
   lastName: z
-    .string("First Nqme cannot be empty")
+    .string("Field cannot be empty")
     .min(2, "Name must be at least 2 characters")
     .max(100, "Name must be less than 100 characters")
     .optional(),
@@ -89,7 +91,9 @@ export const profileSchema = z.object({
 export const requestPasswordChangeSchema = z
   .object({
     email: z.email("Valid email is required"),
-    currentPassword: z.string().min(1, "Current password is required"),
+    currentPassword: z
+      .string("Field cannot be empty")
+      .min(1, "Current password is required"),
     newPassword: passwordSchema,
     confirmPassword: z.string().min(1, "Please confirm your password"),
   })

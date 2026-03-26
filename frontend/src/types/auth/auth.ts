@@ -52,6 +52,17 @@ export interface RegisterResponse {
   userId: number;
   deliveryMethod?: "sms" | "email";
 }
+export interface RegisterRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  phoneNumber: string;
+}
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
 
 export interface TokensResponse {
   accessToken: string;

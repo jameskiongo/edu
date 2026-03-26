@@ -1,6 +1,8 @@
 import axios from "axios";
 import type {
+  LoginRequest,
   LoginResponse,
+  RegisterRequest,
   RegisterResponse,
   TokensResponse,
 } from "@/types/auth/auth";
@@ -14,7 +16,7 @@ export const api = axios.create({
   },
 });
 export const authApi = {
-  login: (data: { email: string; password: string }) =>
+  login: (data: LoginRequest) =>
     api.post<{
       success: boolean;
       message: string;
@@ -26,12 +28,7 @@ export const authApi = {
       message: string;
       data: TokensResponse;
     }>("/auth/verify-login", data),
-  register: (data: {
-    name: string;
-    email: string;
-    password: string;
-    phoneNumber: string;
-  }) =>
+  register: (data: RegisterRequest) =>
     api.post<{
       success: boolean;
       message: string;
