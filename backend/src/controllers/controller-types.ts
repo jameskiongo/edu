@@ -93,6 +93,20 @@ export interface UpdateProfileBody {
 	image?: string;
 }
 
+export interface AssignRoleBody {
+	role: "ADMIN" | "TEACHER" | "STUDENT";
+}
+
+export interface UpdateTeacherProfileBody {
+	bio?: string;
+	specialization?: string;
+	yearsOfExperience?: number;
+}
+
+export interface UpdateStudentProfileBody {
+	studentIdNumber?: string;
+}
+
 export interface UserProfile {
 	firstName: string;
 	lastName: string;

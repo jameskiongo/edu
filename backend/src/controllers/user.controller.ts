@@ -2,7 +2,12 @@ import type { Request, Response } from "express";
 import { type UserService, userService } from "../services/user.service";
 import { UnauthorizedError } from "../utils/errors";
 import { BaseController } from "./base.controller";
-import type { UpdateProfileBody } from "./controller-types";
+import type {
+	AssignRoleBody,
+	UpdateProfileBody,
+	UpdateStudentProfileBody,
+	UpdateTeacherProfileBody,
+} from "./controller-types";
 
 export class UserController extends BaseController {
 	constructor(private userService: UserService) {
@@ -43,6 +48,67 @@ export class UserController extends BaseController {
 			res,
 			updatedProfile,
 			"Profile updated successfully",
+		);
+	};
+
+	assignRole = async (
+		req: Request<unknown, unknown, AssignRoleBody>,
+		res: Response,
+	) => {
+		const userId: number | undefined = req.userId;
+
+		if (!userId) {
+			throw new UnauthorizedError("Not authenticated");
+		}
+
+		const { role } = req.body;
+
+		const updatedProfile = await this.userService.assignRole(userId, role);
+
+		return this.sendResponse(res, updatedProfile, `Role assigned as ${role}`);
+	};
+
+	updateTeacherProfile = async (
+		req: Request<unknown, unknown, UpdateTeacherProfileBody>,
+		res: Response,
+	) => {
+		const userId: number | undefined = req.userId;
+
+		if (!userId) {
+			throw new UnauthorizedError("Not authenticated");
+		}
+
+		const updatedProfile = await this.userService.updateTeacherProfile(
+			userId,
+			req.body,
+		);
+
+		return this.sendResponse(
+			res,
+			updatedProfile,
+			"Teacher profile updated successfully",
+		);
+	};
+
+	updateStudentProfile = async (
+		req: Request<unknown, unknown, UpdateStudentProfileBody>,
+		res: Response,
+	) => {
+		const userId: number | undefined = req.userId;
+
+		if (!userId) {
+			throw new UnauthorizedError("Not authenticated");
+		}
+
+		const updatedProfile = await this.userService.updateStudentProfile(
+			userId,
+			req.body,
+		);
+
+		return this.sendResponse(
+			res,
+			updatedProfile,
+			"Student profile updated successfully",
 		);
 	};
 }
