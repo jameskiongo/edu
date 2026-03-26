@@ -1,12 +1,16 @@
 import { relations } from "drizzle-orm";
 import {
 	boolean,
+	decimal,
 	integer,
+	pgEnum,
 	pgTable,
 	serial,
 	timestamp,
 	varchar,
 } from "drizzle-orm/pg-core";
+
+export const userRole = pgEnum("user_role", ["ADMIN", "TEACHER", "STUDENT"]);
 
 export const users = pgTable("users", {
 	id: serial("id").primaryKey(),
@@ -22,6 +26,7 @@ export const users = pgTable("users", {
 	lockUntil: timestamp("lock_until"),
 	defaultSmsDelivery: boolean("default_sms_delivery").default(true).notNull(),
 	isBlacklisted: boolean("is_blacklisted").default(false).notNull(),
+	role: userRole("role").default("STUDENT").notNull(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -50,12 +55,61 @@ export const otpCodes = pgTable("otp_codes", {
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const teacherProfiles = pgTable("teacher_profiles", {
+	userId: integer("user_id")
+		.references(() => users.id, { onDelete: "cascade" })
+		.primaryKey()
+		.unique(),
+	bio: varchar("bio", { length: 1000 }),
+	specialization: varchar("specialization", { length: 255 }),
+	yearsOfExperience: integer("years_of_experience").default(0),
+	rating: decimal("rating", { precision: 3, scale: 2 }).default("0.00"),
+	totalStudents: integer("total_students").default(0),
+});
+
+export const studentProfiles = pgTable("student_profiles", {
+	userId: integer("user_id")
+		.references(() => users.id, { onDelete: "cascade" })
+		.primaryKey()
+		.unique(),
+	enrolledCoursesCount: integer("enrolled_courses_count").default(0),
+	completedCourses: integer("completed_courses").default(0),
+	totalPoints: integer("total_points").default(0),
+	studentIdNumber: varchar("student_id_number", { length: 50 }).unique(),
+});
+
+export const usersRelations = relations(users, ({ many, one }) => ({
 	refreshTokens: many(refreshTokens),
 	otpCodes: many(otpCodes),
+	teacherProfile: one(teacherProfiles, {
+		fields: [users.id],
+		references: [teacherProfiles.userId],
+	}),
+	studentProfile: one(studentProfiles, {
+		fields: [users.id],
+		references: [studentProfiles.userId],
+	}),
+}));
+
+export const teacherProfilesRelations = relations(teacherProfiles, ({ one }) => ({
+	user: one(users, {
+		fields: [teacherProfiles.userId],
+		references: [users.id],
+	}),
+}));
+
+export const studentProfilesRelations = relations(studentProfiles, ({ one }) => ({
+	user: one(users, {
+		fields: [studentProfiles.userId],
+		references: [users.id],
+	}),
 }));
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type RefreshToken = typeof refreshTokens.$inferSelect;
 export type OtpCode = typeof otpCodes.$inferSelect;
+export type TeacherProfile = typeof teacherProfiles.$inferSelect;
+export type NewTeacherProfile = typeof teacherProfiles.$inferInsert;
+export type StudentProfile = typeof studentProfiles.$inferSelect;
+export type NewStudentProfile = typeof studentProfiles.$inferInsert;
