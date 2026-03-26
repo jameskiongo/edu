@@ -40,4 +40,32 @@ export const authApi = {
       success: boolean;
       message: string;
     }>("/auth/verify-registration", data),
+  resendLoginOTP: (data: { userId: number; purpose: string }) =>
+    api.post<{
+      success: boolean;
+      message: string;
+      data: {
+        success: boolean;
+        message: string;
+        deliveryMethod: "sms" | "email";
+        isBlacklisted?: boolean;
+      };
+    }>("/auth/resend-login-otp", data),
+
+  resendRegisterOTP: (data: { userId: number; purpose: string }) =>
+    api.post<{
+      success: boolean;
+      message: string;
+      data: {
+        success: boolean;
+        message: string;
+        deliveryMethod: "sms" | "email";
+        isBlacklisted?: boolean;
+      };
+    }>("/auth/resend-register-otp", data),
+};
+export const userApi = {
+  getProfile: () => api.get("/users/profile"),
+  updateProfile: (data: { name?: string; image?: string }) =>
+    api.patch("/users/profile", data),
 };

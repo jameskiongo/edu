@@ -15,6 +15,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useUser } from "@/hooks/auth/useAuth";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -26,9 +27,9 @@ const navItems = [
 ];
 
 export function Sidebar() {
+  const { user, mutate } = useUser();
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   return (
     <div
@@ -85,14 +86,14 @@ export function Sidebar() {
       </nav>
       <div className="border-t border-border p-3">
         <div className="mt-3">
-          {!isLoggedIn ? (
+          {!user ? (
             <div
               className={cn("flex gap-2", collapsed ? "flex-col" : "flex-row")}
             >
               <a
                 href="/login"
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  "flex w-full items-center gap-3 text-primary rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 )}
               >
                 <LogInIcon className="size-5 shrink-0" />
@@ -111,7 +112,7 @@ export function Sidebar() {
             </div>
           ) : (
             <div className="flex items-center gap-3 rounded-lg bg-secondary/50 p-3">
-              <UserIcon className="size-10" />
+              <UserIcon className="size-5 text-muted-foreground hover:bg-secondary hover:text-foreground" />
               {!collapsed && (
                 <div className="flex-1 overflow-hidden">
                   <p className="truncate text-sm font-medium text-foreground">

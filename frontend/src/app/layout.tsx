@@ -21,7 +21,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const noSidebar = ["/login", "/register"];
+  const noSidebar = [
+    "/login",
+    "/register",
+    "/verify-register",
+    "/verify-login",
+  ];
   const showSidebar = !noSidebar.includes(pathname);
   return (
     <html
