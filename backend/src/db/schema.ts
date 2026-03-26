@@ -20,6 +20,8 @@ export const users = pgTable("users", {
 	isActive: boolean("is_active").default(true).notNull(),
 	failedLoginAttempts: integer("failed_login_attempts").default(0),
 	lockUntil: timestamp("lock_until"),
+	defaultSmsDelivery: boolean("default_sms_delivery").default(true).notNull(),
+	isBlacklisted: boolean("is_blacklisted").default(false).notNull(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

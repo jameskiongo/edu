@@ -6,7 +6,12 @@ import { BadRequestError, NotFoundError } from "../utils/errors";
 export class UserService {
 	async updateProfile(
 		userId: number,
-		data: { firstName?: string; lastName?: string; image?: string },
+		data: {
+			firstName?: string;
+			lastName?: string;
+			image?: string;
+			defaultSmsDelivery?: boolean;
+		},
 	) {
 		const existingUser = await db
 			.select()
@@ -38,6 +43,10 @@ export class UserService {
 			updateData.image = data.image === "" ? null : data.image;
 		}
 
+		if (data.defaultSmsDelivery !== undefined) {
+			updateData.defaultSmsDelivery = data.defaultSmsDelivery;
+		}
+
 		const [updatedUser] = await db
 			.update(users)
 			.set(updateData)
@@ -50,6 +59,8 @@ export class UserService {
 				image: users.image,
 				phoneNumber: users.phoneNumber,
 				isVerified: users.isVerified,
+				defaultSmsDelivery: users.defaultSmsDelivery,
+				isBlacklisted: users.isBlacklisted,
 				updatedAt: users.updatedAt,
 			});
 
@@ -67,6 +78,8 @@ export class UserService {
 				phoneNumber: users.phoneNumber,
 				isVerified: users.isVerified,
 				isActive: users.isActive,
+				defaultSmsDelivery: users.defaultSmsDelivery,
+				isBlacklisted: users.isBlacklisted,
 				createdAt: users.createdAt,
 				updatedAt: users.updatedAt,
 			})

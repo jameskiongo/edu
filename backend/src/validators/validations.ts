@@ -67,14 +67,17 @@ export const updateProfileSchema = z
 			.max(500, "Image URL too long")
 			.optional()
 			.or(z.literal("")),
+		defaultSmsDelivery: z.boolean().optional(),
 	})
 	.refine(
 		(data) =>
 			data.firstName !== undefined ||
 			data.lastName !== undefined ||
-			data.image !== undefined,
+			data.image !== undefined ||
+			data.defaultSmsDelivery !== undefined,
 		{
-			message: "At least one field (name or image) must be provided",
+			message:
+				"At least one field (firstName, lastName, image, or defaultSmsDelivery) must be provided",
 		},
 	);
 

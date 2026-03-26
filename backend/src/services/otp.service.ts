@@ -72,22 +72,42 @@ export class OtpService {
 			throw new BadRequestError("Failed to send OTP via email");
 		}
 
-		const smsResult: SMSResult = await this.smsService.sendOTPFetch(
-			phoneNumber,
-			code,
-		);
+		const user = await db
+			.select()
+			.from(users)
+			.where(eq(users.id, userId))
+			.limit(1)
+			.then((rows) => rows[0]);
 
-		if (smsResult.success) {
-			return {
-				success: true,
-				message: "OTP sent to your phone",
-				deliveryMethod: "sms",
-			};
+		let isCurrentlyBlacklisted = user?.isBlacklisted ?? false;
+		const trySms = (user?.defaultSmsDelivery ?? true) && !isCurrentlyBlacklisted;
+
+		if (trySms) {
+			const smsResult: SMSResult = await this.smsService.sendOTPFetch(
+				phoneNumber,
+				code,
+			);
+
+			if (smsResult.success) {
+				return {
+					success: true,
+					message: "OTP sent to your phone",
+					deliveryMethod: "sms",
+				};
+			}
+
+			if (smsResult.isBlacklisted) {
+				isCurrentlyBlacklisted = true;
+				await db
+					.update(users)
+					.set({ isBlacklisted: true, defaultSmsDelivery: false })
+					.where(eq(users.id, userId));
+			}
+
+			console.log(
+				`SMS failed for user ${userId}: ${smsResult.message}. Falling back to email.`,
+			);
 		}
-
-		console.log(
-			`SMS failed for user ${userId}: ${smsResult.message}. Falling back to email.`,
-		);
 
 		const emailSent: boolean = await this.emailService.sendEmailOtp(
 			email,
@@ -97,11 +117,11 @@ export class OtpService {
 		if (emailSent) {
 			return {
 				success: true,
-				message: smsResult.isBlacklisted
+				message: isCurrentlyBlacklisted
 					? "SMS delivery failed. OTP sent to your email instead."
 					: "OTP sent to your email",
 				deliveryMethod: "email",
-				isBlacklisted: smsResult.isBlacklisted,
+				isBlacklisted: isCurrentlyBlacklisted,
 			};
 		}
 
