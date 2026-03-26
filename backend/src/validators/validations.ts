@@ -115,6 +115,20 @@ export const logoutSchema = z.object({
 	refreshToken: z.string().min(1, "Refresh token is required"),
 });
 
+export const assignRoleSchema = z.object({
+	role: z.enum(["ADMIN", "TEACHER", "STUDENT"]),
+});
+
+export const updateTeacherProfileSchema = z.object({
+	bio: z.string().max(1000).optional(),
+	specialization: z.string().max(255).optional(),
+	yearsOfExperience: z.number().int().min(0).optional(),
+});
+
+export const updateStudentProfileSchema = z.object({
+	studentIdNumber: z.string().max(50).optional(),
+});
+
 export type RequestPasswordChangeInput = z.infer<
 	typeof requestPasswordChangeSchema
 >;
@@ -134,3 +148,10 @@ export type PasswordResetConfirmInput = z.infer<
 export type ResendOtpInput = z.infer<typeof resendOtpSchema>;
 export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
 export type LogoutInput = z.infer<typeof logoutSchema>;
+export type AssignRoleInput = z.infer<typeof assignRoleSchema>;
+export type UpdateTeacherProfileInput = z.infer<
+	typeof updateTeacherProfileSchema
+>;
+export type UpdateStudentProfileInput = z.infer<
+	typeof updateStudentProfileSchema
+>;
