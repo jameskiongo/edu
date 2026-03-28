@@ -92,9 +92,11 @@ export interface UpdateProfileBody {
 	firstName: string;
 	lastName: string;
 	image?: string;
+	defaultSmsDelivery?: boolean;
 }
 
 export interface AssignRoleBody {
+	userId: number;
 	role: "ADMIN" | "TEACHER" | "STUDENT";
 }
 
@@ -104,9 +106,7 @@ export interface UpdateTeacherProfileBody {
 	yearsOfExperience?: number;
 }
 
-export interface UpdateStudentProfileBody {
-	studentIdNumber?: string;
-}
+export interface UpdateStudentProfileBody {}
 
 export interface UserProfile {
 	firstName: string;

@@ -41,13 +41,13 @@ export class OtpController extends BaseController {
 	};
 
 	resendPasswordChangeOTP = async (
-		req: Request<{}, {}, { email: string }>,
+		req: Request<{}, {}, { userId: number }>,
 		res: Response,
 	) => {
 		this.validate(req);
-		const { email } = req.body;
+		const { userId } = req.body;
 
-		const user = await this.authService.findByEmail(email);
+		const user = await this.authService.findById(userId);
 		if (!user) {
 			throw new NotFoundError("User not found");
 		}
@@ -55,7 +55,7 @@ export class OtpController extends BaseController {
 		await this.otpService.sendOTP(
 			user.id,
 			user.phoneNumber,
-			email,
+			user.email,
 			"password_change",
 		);
 
