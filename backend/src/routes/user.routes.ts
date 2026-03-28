@@ -1,7 +1,12 @@
 import { Router } from "express";
 import { catchAsync } from "../controllers/base.controller";
 import { userController } from "../controllers/user.controller";
-import { authenticate, validate } from "../middlewares/auth.middleware";
+import {
+	authenticate,
+	authorize,
+	validate,
+} from "../middlewares/auth.middleware";
+import { upload } from "../middlewares/upload.middleware";
 import {
 	assignRoleSchema,
 	updateProfileSchema,
@@ -12,6 +17,26 @@ import {
 const router = Router();
 
 router.get("/profile", authenticate, catchAsync(userController.getProfile));
+router.get(
+	"/teachers",
+	authenticate,
+	authorize(["ADMIN"]),
+	catchAsync(userController.getAllTeachers),
+);
+router.get(
+	"/students",
+	authenticate,
+	authorize(["ADMIN"]),
+	catchAsync(userController.getAllStudents),
+);
+
+router.post(
+	"/profile/image",
+	authenticate,
+	upload.single("image"),
+	catchAsync(userController.uploadImage),
+);
+
 router.patch(
 	"/profile",
 	authenticate,
@@ -22,6 +47,7 @@ router.patch(
 router.patch(
 	"/role",
 	authenticate,
+	authorize(["ADMIN"]),
 	validate(assignRoleSchema),
 	catchAsync(userController.assignRole),
 );
