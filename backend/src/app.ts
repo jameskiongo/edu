@@ -1,3 +1,4 @@
+import path from "node:path";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
@@ -11,7 +12,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3003;
 
-app.use(helmet());
+app.use(helmet({
+	crossOriginResourcePolicy: false,
+}));
 app.use(
 	cors({
 		origin: process.env.CLIENT_URL || "http://localhost:3000",
@@ -20,6 +23,9 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from the uploads directory
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.get("/health", (_, res) => {
 	res.json({ status: "OK", timestamp: new Date().toISOString() });

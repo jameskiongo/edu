@@ -5,71 +5,22 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1772530294580,
-      "tag": "0000_glorious_grey_gargoyle",
+      "when": 1774679305760,
+      "tag": "0000_public_stature",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1772608561785,
-      "tag": "0001_magenta_silver_fox",
+      "when": 1774684821422,
+      "tag": "0001_right_romulus",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1772609181785,
-      "tag": "0002_simple_ultragirl",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1772716468633,
-      "tag": "0003_sharp_morbius",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1774460785006,
-      "tag": "0004_flat_vindicator",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1774544163936,
-      "tag": "0005_odd_mystique",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1774545486609,
-      "tag": "0006_even_mindworm",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1774609619166,
-      "tag": "0007_grey_archangel",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1774609666139,
-      "tag": "0008_swift_calypso",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1774609859594,
-      "tag": "0009_clean_nehzno",
+      "when": 1774712574250,
+      "tag": "0002_numerous_jocasta",
       "breakpoints": true
     }
   ]
