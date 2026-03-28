@@ -73,7 +73,11 @@ export class UserService {
 			where: eq(users.id, userId),
 			with: {
 				teacherProfile: true,
-				studentProfile: true,
+				studentProfile: {
+					with: {
+						badges: true,
+					},
+				},
 			},
 		});
 
@@ -83,7 +87,46 @@ export class UserService {
 
 		// biome-ignore lint/style/noUnusedTemplateLiteral: <explanation>
 		const { password, failedLoginAttempts, lockUntil, ...safeUser } = user;
+
+		// Clean up profile based on role
+		if (safeUser.role === "TEACHER") {
+			const { studentProfile, ...teacherOnly } = safeUser;
+			return teacherOnly;
+		}
+		if (safeUser.role === "STUDENT") {
+			const { teacherProfile, ...studentOnly } = safeUser;
+			return studentOnly;
+		}
+
 		return safeUser;
+	}
+
+	async getAllTeachers() {
+		return db.query.users.findMany({
+			where: eq(users.role, "TEACHER"),
+			with: {
+				teacherProfile: true,
+			},
+			columns: {
+				password: false,
+				failedLoginAttempts: false,
+				lockUntil: false,
+			},
+		});
+	}
+
+	async getAllStudents() {
+		return db.query.users.findMany({
+			where: eq(users.role, "STUDENT"),
+			with: {
+				studentProfile: true,
+			},
+			columns: {
+				password: false,
+				failedLoginAttempts: false,
+				lockUntil: false,
+			},
+		});
 	}
 
 	async assignRole(userId: number, role: "ADMIN" | "TEACHER" | "STUDENT") {
@@ -144,9 +187,7 @@ export class UserService {
 
 	async updateStudentProfile(
 		userId: number,
-		data: {
-			studentIdNumber?: string;
-		},
+		data: Record<string, any>,
 	) {
 		const user = await db.query.users.findFirst({
 			where: eq(users.id, userId),
@@ -156,10 +197,12 @@ export class UserService {
 			throw new BadRequestError("User is not a student");
 		}
 
-		await db
-			.update(studentProfiles)
-			.set(data)
-			.where(eq(studentProfiles.userId, userId));
+		if (Object.keys(data).length > 0) {
+			await db
+				.update(studentProfiles)
+				.set(data)
+				.where(eq(studentProfiles.userId, userId));
+		}
 
 		return this.getProfile(userId);
 	}

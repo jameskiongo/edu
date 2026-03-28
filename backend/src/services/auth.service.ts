@@ -363,6 +363,27 @@ export class AuthService {
 		};
 	}
 
+	async findById(
+		userId: number,
+	): Promise<{ id: number; email: string; phoneNumber: string } | null> {
+		const user = await db
+			.select()
+			.from(users)
+			.where(eq(users.id, userId))
+			.limit(1)
+			.then((rows) => rows[0]);
+
+		if (!user) {
+			return null;
+		}
+
+		return {
+			id: user.id,
+			email: user.email,
+			phoneNumber: user.phoneNumber,
+		};
+	}
+
 	async updatePassword(userId: number, newPassword: string): Promise<void> {
 		const hashedPassword = await this.hashPassword(newPassword);
 
