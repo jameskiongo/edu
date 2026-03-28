@@ -88,15 +88,13 @@ export const studentProfiles = pgTable("student_profiles", {
 		.primaryKey(),
 	enrolledCoursesCount: integer("enrolled_courses_count").default(0),
 	completedCourses: integer("completed_courses").default(0),
-	totalPoints: integer("total_points").default(0),
-	studentIdNumber: varchar("student_id_number", { length: 50 }).unique(),
 });
 export const studentBadges = pgTable(
 	"student_badges",
 	{
 		id: serial("id").primaryKey(),
 		studentId: integer("student_id")
-			.references(() => users.id, { onDelete: "cascade" })
+			.references(() => studentProfiles.userId, { onDelete: "cascade" })
 			.notNull(),
 		badgeType: badgeType("badge_type").notNull(),
 		earnedAt: timestamp("earned_at").defaultNow().notNull(),
@@ -147,9 +145,14 @@ export const studentProfilesRelations = relations(
 );
 
 export const studentBadgesRelations = relations(studentBadges, ({ one }) => ({
-	student: one(studentProfiles, {
+	student: one(users, {
+		fields: [studentBadges.studentId],
+		references: [users.id],
+	}),
+	studentProfile: one(studentProfiles, {
 		fields: [studentBadges.studentId],
 		references: [studentProfiles.userId],
+		relationName: "studentProfileBadges",
 	}),
 }));
 
