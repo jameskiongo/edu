@@ -119,6 +119,7 @@ export const logoutSchema = z.object({
 });
 
 export const assignRoleSchema = z.object({
+	userId: z.coerce.number().int().positive("Valid user ID is required"),
 	role: z.enum(["ADMIN", "TEACHER", "STUDENT"]),
 });
 
@@ -128,9 +129,7 @@ export const updateTeacherProfileSchema = z.object({
 	yearsOfExperience: z.number().int().min(0).optional(),
 });
 
-export const updateStudentProfileSchema = z.object({
-	studentIdNumber: z.string().max(50).optional(),
-});
+export const updateStudentProfileSchema = z.object({});
 
 export type RequestPasswordChangeInput = z.infer<
 	typeof requestPasswordChangeSchema
