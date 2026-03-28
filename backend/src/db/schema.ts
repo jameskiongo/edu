@@ -18,10 +18,10 @@ export const badgeType = pgEnum("badge_type", [
 	"COURSE_COMPLETION",
 ]);
 export const otpPurpose = pgEnum("otp_purpose", [
-	"LOGIN",
-	"VERIFICATION",
-	"PASSWORD_RESET",
-	"PASSWORD_CHANGE",
+	"login",
+	"verification",
+	"password_reset",
+	"password_change",
 ]);
 
 export const users = pgTable("users", {
@@ -96,11 +96,11 @@ export const studentBadges = pgTable(
 	{
 		id: serial("id").primaryKey(),
 		studentId: integer("student_id")
-			.references(() => studentProfiles.userId, { onDelete: "cascade" })
+			.references(() => users.id, { onDelete: "cascade" })
 			.notNull(),
 		badgeType: badgeType("badge_type").notNull(),
 		earnedAt: timestamp("earned_at").defaultNow().notNull(),
-		courseId: integer("course_id").notNull(),
+		courseId: integer("course_id"),
 	},
 	(t) => [
 		index("student_badges_student_id_idx").on(t.studentId),
