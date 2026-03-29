@@ -12,13 +12,27 @@ export interface SMSResult {
 }
 
 export class SMSService {
-	async sendOTPFetch(phoneNumber: string, code: string): Promise<SMSResult> {
+	async sendOTPFetch(
+		phoneNumber: string,
+		code: string,
+		purpose: "login" | "verification" | "password_reset" | "password_change" = "login",
+	): Promise<SMSResult> {
 		try {
 			const formattedNumber = this.formatPhoneNumber(phoneNumber);
 			const username = process.env.AT_USERNAME!;
 			const apiKey = process.env.AT_API_KEY!;
 
-			const message = `Your verification code is: ${code}. Valid for 10 minutes.`;
+			let message = `Your verification code is: ${code}. Valid for 10 minutes.`;
+
+			if (purpose === "login") {
+				message = `Your login verification code is: ${code}. Valid for 10 minutes.`;
+			} else if (purpose === "verification") {
+				message = `Your account verification code is: ${code}. Valid for 10 minutes.`;
+			} else if (purpose === "password_change") {
+				message = `Your password change verification code is: ${code}. Valid for 10 minutes.`;
+			} else if (purpose === "password_reset") {
+				message = `Your password reset verification code is: ${code}. Valid for 10 minutes.`;
+			}
 
 			const params = new URLSearchParams({
 				username: username,
