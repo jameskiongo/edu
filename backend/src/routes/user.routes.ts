@@ -12,6 +12,8 @@ import {
 	updateProfileSchema,
 	updateStudentProfileSchema,
 	updateTeacherProfileSchema,
+	requestPhoneChangeSchema,
+	verifyPhoneChangeSchema,
 } from "../validators/validations";
 
 const router = Router();
@@ -64,6 +66,20 @@ router.patch(
 	authenticate,
 	validate(updateStudentProfileSchema),
 	catchAsync(userController.updateStudentProfile),
+);
+
+router.post(
+	"/profile/phone-change",
+	authenticate,
+	validate(requestPhoneChangeSchema),
+	catchAsync(userController.requestPhoneChange),
+);
+
+router.post(
+	"/profile/verify-phone-change",
+	authenticate,
+	validate(verifyPhoneChangeSchema),
+	catchAsync(userController.verifyPhoneChange),
 );
 
 export default router;
