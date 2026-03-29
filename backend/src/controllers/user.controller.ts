@@ -36,6 +36,21 @@ export class UserController extends BaseController {
 		return this.sendResponse(res, students);
 	};
 
+	getAllUsers = async (_: Request, res: Response) => {
+		const users = await this.userService.getAllUsers();
+		return this.sendResponse(res, users);
+	};
+
+	toggleUserStatus = async (req: Request, res: Response) => {
+		const { userId, isActive } = req.body;
+		const result = await this.userService.toggleUserStatus(userId, isActive);
+		return this.sendResponse(
+			res,
+			result,
+			`User ${isActive ? "activated" : "deactivated"} successfully`,
+		);
+	};
+
 	updateProfile = async (
 		req: Request<unknown, unknown, UpdateProfileBody>,
 		res: Response,

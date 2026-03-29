@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "../db/db";
-import { studentProfiles, teacherProfiles, users } from "../db/schema";
+import { refreshTokens, studentProfiles, teacherProfiles, users } from "../db/schema";
 import { BadRequestError, NotFoundError } from "../utils/errors";
 import { otpService } from "./otp.service";
 
@@ -134,6 +134,43 @@ export class UserService {
 		});
 	}
 
+	async getAllUsers() {
+		return db.query.users.findMany({
+			with: {
+				teacherProfile: true,
+				studentProfile: true,
+			},
+			columns: {
+				password: false,
+				failedLoginAttempts: false,
+				lockUntil: false,
+			},
+			orderBy: (users, { desc }) => [desc(users.createdAt)],
+		});
+	}
+
+	async toggleUserStatus(userId: number, isActive: boolean) {
+		const user = await db.query.users.findFirst({
+			where: eq(users.id, userId),
+		});
+
+		if (!user) {
+			throw new NotFoundError("User not found");
+		}
+
+		const [updatedUser] = await db
+			.update(users)
+			.set({ isActive, updatedAt: new Date() })
+			.where(eq(users.id, userId))
+			.returning({
+				id: users.id,
+				isActive: users.isActive,
+				updatedAt: users.updatedAt,
+			});
+
+		return updatedUser;
+	}
+
 	async assignRole(userId: number, role: "ADMIN" | "TEACHER" | "STUDENT") {
 		const user = await db.query.users.findFirst({
 			where: eq(users.id, userId),
@@ -144,7 +181,14 @@ export class UserService {
 		}
 
 		await db.transaction(async (tx) => {
-			await tx.update(users).set({ role }).where(eq(users.id, userId));
+			// Update the role
+			await tx.update(users).set({ role, updatedAt: new Date() }).where(eq(users.id, userId));
+
+			// Revoke all existing refresh tokens to force re-login
+			await tx
+				.update(refreshTokens)
+				.set({ revoked: true })
+				.where(eq(refreshTokens.userId, userId));
 
 			if (role === "TEACHER") {
 				const existingProfile = await tx.query.teacherProfiles.findFirst({

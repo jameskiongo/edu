@@ -9,6 +9,7 @@ import {
 import { upload } from "../middlewares/upload.middleware";
 import {
 	assignRoleSchema,
+	toggleUserStatusSchema,
 	updateProfileSchema,
 	updateStudentProfileSchema,
 	updateTeacherProfileSchema,
@@ -19,6 +20,12 @@ import {
 const router = Router();
 
 router.get("/profile", authenticate, catchAsync(userController.getProfile));
+router.get(
+	"/",
+	authenticate,
+	authorize(["ADMIN"]),
+	catchAsync(userController.getAllUsers),
+);
 router.get(
 	"/teachers",
 	authenticate,
@@ -52,6 +59,14 @@ router.patch(
 	authorize(["ADMIN"]),
 	validate(assignRoleSchema),
 	catchAsync(userController.assignRole),
+);
+
+router.patch(
+	"/status",
+	authenticate,
+	authorize(["ADMIN"]),
+	validate(toggleUserStatusSchema),
+	catchAsync(userController.toggleUserStatus),
 );
 
 router.patch(
