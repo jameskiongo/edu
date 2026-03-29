@@ -1,4 +1,5 @@
 import { GraduationCap } from "lucide-react";
+import { Suspense } from "react";
 import { VerifyLoginForm } from "@/components/auth/VerifyLoginForm";
 
 export default function VerifyRegisterPage() {
@@ -21,7 +22,9 @@ export default function VerifyRegisterPage() {
                 Sign in to your account
               </h2>
             </div>
-            <VerifyLoginForm />
+            <Suspense fallback={<div>Loading...</div>}>
+              <VerifyLoginForm />
+            </Suspense>
           </div>
         </div>
       </div>
