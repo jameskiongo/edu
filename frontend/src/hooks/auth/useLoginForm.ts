@@ -36,10 +36,7 @@ export function useLoginForm() {
               ? "Login code sent to your email"
               : "Login code sent to your phone",
           );
-          setTimeout(() => {
-            toast.dismiss();
-            router.push("/verify-login");
-          }, 1500);
+          router.push("/verify-login");
         }
       } catch (error) {
         const axiosError = error as AxiosError<ErrorResponse>;
