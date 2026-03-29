@@ -39,6 +39,7 @@ export const registerSchema = z
         /^\+?[1-9]\d{1,14}$/,
         "Please enter a valid phone number with country code (e.g., +254712345678)",
       ),
+    role: z.enum(["STUDENT", "TEACHER"]).default("STUDENT"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -73,20 +74,37 @@ export const resetPasswordSchema = z
 
 export const profileSchema = z.object({
   firstName: z
-    .string("Field cannot be empty")
+    .string()
     .min(2, "Name must be at least 2 characters")
     .max(100, "Name must be less than 100 characters")
     .optional(),
   lastName: z
-    .string("Field cannot be empty")
+    .string()
     .min(2, "Name must be at least 2 characters")
     .max(100, "Name must be less than 100 characters")
     .optional(),
+  phoneNumber: z
+    .string()
+    .min(1, "Phone number cannot be empty")
+    .regex(
+      /^\+?[1-9]\d{1,14}$/,
+      "Valid phone number with country code is required (e.g., +1234567890)",
+    )
+    .optional(),
   image: z
-    .url("Please enter a valid URL")
+    .string()
     .max(500, "URL is too long")
     .optional()
     .or(z.literal("")),
+  defaultSmsDelivery: z.boolean().optional(),
+  bio: z.string().max(1000, "Bio is too long").optional(),
+  specialization: z.string().max(255, "Specialization is too long").optional(),
+  yearsOfExperience: z.number().min(0).max(100).optional(),
+  totalReviews: z.number().min(0).optional(),
+  website: z.string().url("Must be a valid URL").max(255).optional().or(z.literal("")),
+  twitter: z.string().url("Must be a valid URL").max(255).optional().or(z.literal("")),
+  linkedin: z.string().url("Must be a valid URL").max(255).optional().or(z.literal("")),
+  github: z.string().url("Must be a valid URL").max(255).optional().or(z.literal("")),
 });
 export const requestPasswordChangeSchema = z
   .object({
@@ -112,6 +130,36 @@ export const passwordResetConfirmSchema = z
     message: "Passwords don't match",
     path: ["confirmPassword"],
   });
+export const verifyPasswordChangeSchema = z
+  .object({
+    email: z.email("Valid email is required"),
+    code: z
+      .string("Field cannot be empty")
+      .length(6, "Code must be exactly 6 digits")
+      .regex(/^\d+$/, "Code must contain only numbers"),
+    newPassword: passwordSchema,
+    confirmPassword: z.string("Password cannot be empty"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+export const changePasswordSchema = z
+  .object({
+    email: z.email("Valid email is required"),
+    currentPassword: z
+      .string("Field cannot be empty")
+      .min(1, "Current password is required"),
+    newPassword: passwordSchema,
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+    code: z.string().optional(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type OtpInput = z.infer<typeof otpSchema>;
