@@ -7,6 +7,8 @@ import {
   CompassIcon,
   GraduationCap,
   LayoutDashboard,
+  Layers,
+  Users,
   LogInIcon,
   LogOutIcon,
   Settings,
@@ -35,6 +37,11 @@ const navItems = [
   { icon: BookOpen, label: "My Courses", href: "#" },
   { icon: Calendar, label: "Schedule", href: "#" },
   { icon: Trophy, label: "Certificates", href: "#" },
+];
+
+const adminItems = [
+  { icon: Users, label: "Manage Users", href: "/dashboard/admin/users" },
+  { icon: Layers, label: "Manage Categories", href: "/dashboard/admin/categories" },
 ];
 
 export function Sidebar() {
@@ -82,6 +89,36 @@ export function Sidebar() {
 
       <nav className="flex-1 space-y-1 p-3">
         {navItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.label}
+              href={item.href}
+              className={cn(
+                "flex w-full items-center rounded-lg transition-colors",
+                collapsed ? "justify-center px-0 py-2.5" : "gap-3 px-3 py-2.5",
+                isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+              )}
+            >
+              <item.icon className="size-5 shrink-0" />
+              {!collapsed && (
+                <span className="truncate text-sm font-medium animate-in fade-in duration-300">
+                  {item.label}
+                </span>
+              )}
+            </Link>
+          );
+        })}
+
+        {!collapsed && user?.role === "ADMIN" && (
+          <div className="px-3 pt-4 pb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Admin Panel
+          </div>
+        )}
+
+        {user?.role === "ADMIN" && adminItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link
