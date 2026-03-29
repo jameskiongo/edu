@@ -209,7 +209,13 @@ export class AuthService {
 	async completeLogin(
 		userId: number,
 		code: string,
-	): Promise<Tokens & { userId: number }> {
+	): Promise<Tokens & { 
+		userId: number;
+		role: string;
+		email: string;
+		firstName: string;
+		lastName: string;
+	}> {
 		await this.otpService.verifyOTP(userId, code, "login");
 		const user = await db
 			.select()
@@ -232,6 +238,10 @@ export class AuthService {
 		});
 		return {
 			userId,
+			role: user.role,
+			email: user.email,
+			firstName: user.firstName,
+			lastName: user.lastName,
 			...tokens,
 		};
 	}

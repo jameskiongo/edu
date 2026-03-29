@@ -18,7 +18,7 @@ export class TokenService {
 		const accessToken = jwt.sign(
 			{ userId, type: "access" },
 			process.env.JWT_SECRET!,
-			{ expiresIn: "15m" }, // Changed from 1m for better UX, usually it's around 15m
+			{ expiresIn: "15m" },
 		);
 
 		const refreshToken = jwt.sign(

@@ -15,7 +15,7 @@ export class SMSService {
 	async sendOTPFetch(
 		phoneNumber: string,
 		code: string,
-		purpose: "login" | "verification" | "password_reset" | "password_change" = "login",
+		purpose: "login" | "verification" | "password_reset" | "password_change" | "phone_change" = "login",
 	): Promise<SMSResult> {
 		try {
 			const formattedNumber = this.formatPhoneNumber(phoneNumber);
@@ -32,6 +32,8 @@ export class SMSService {
 				message = `Your password change verification code is: ${code}. Valid for 10 minutes.`;
 			} else if (purpose === "password_reset") {
 				message = `Your password reset verification code is: ${code}. Valid for 10 minutes.`;
+			} else if (purpose === "phone_change") {
+				message = `Your phone number change verification code is: ${code}. Valid for 10 minutes.`;
 			}
 
 			const params = new URLSearchParams({
