@@ -17,7 +17,7 @@ export interface RegisterBody {
 	email: string;
 	password: string;
 	phoneNumber: string;
-	role: "ADMIN" | "TEACHER" | "STUDENT";
+	role: "TEACHER" | "STUDENT";
 }
 
 export interface LoginBody {
@@ -104,6 +104,11 @@ export interface UpdateTeacherProfileBody {
 	bio?: string;
 	specialization?: string;
 	yearsOfExperience?: number;
+	totalReviews?: number;
+	website?: string;
+	twitter?: string;
+	linkedin?: string;
+	github?: string;
 }
 
 export interface UpdateStudentProfileBody {}

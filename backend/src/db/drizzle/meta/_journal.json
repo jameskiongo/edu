@@ -22,6 +22,20 @@
       "when": 1774712574250,
       "tag": "0002_numerous_jocasta",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1774769170200,
+      "tag": "0003_next_beast",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1774772567451,
+      "tag": "0004_damp_mesmero",
+      "breakpoints": true
     }
   ]
 }
