@@ -1,31 +1,44 @@
 "use client";
 
-import { Eye, EyeOff, Loader2, Lock, Mail, Phone, User } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, Mail, User, GraduationCap, Users } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { useRegistrationForm } from "@/hooks/auth/useRegisterForm";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const formik = useRegistrationForm();
 
   return (
     <form onSubmit={formik.handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <Label>I want to register as a</Label>
+        <Tabs
+          value={formik.values.role}
+          onValueChange={(value) => formik.setFieldValue("role", value)}
+          className="w-full"
+        >
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="STUDENT" className="flex items-center gap-2">
+              <Users className="size-4" />
+              Student
+            </TabsTrigger>
+            <TabsTrigger value="TEACHER" className="flex items-center gap-2">
+              <GraduationCap className="size-4" />
+              Teacher
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
       <div className="flex flex-row gap-2">
-        <div className="space-y-2">
+        <div className="space-y-2 flex-1">
           <Label htmlFor="firstName">First name</Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
@@ -46,7 +59,7 @@ export function RegisterForm() {
             </p>
           )}
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 flex-1">
           <Label htmlFor="lastName">Last name</Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
@@ -90,7 +103,7 @@ export function RegisterForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="email">Phone Number</Label>
+        <Label htmlFor="phoneNumber">Phone Number</Label>
         <div className="relative w-full">
           <PhoneInput
             id="phoneNumber"
@@ -146,7 +159,7 @@ export function RegisterForm() {
           <Input
             id="confirmPassword"
             name="confirmPassword"
-            type={showPassword ? "text" : "password"}
+            type={showConfirmPassword ? "text" : "password"}
             placeholder="Confirm your password"
             value={formik.values.confirmPassword}
             onChange={formik.handleChange}
@@ -155,10 +168,10 @@ export function RegisterForm() {
           />
           <button
             type="button"
-            onClick={() => setShowPassword(!showPassword)}
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           >
-            {showPassword ? (
+            {showConfirmPassword ? (
               <EyeOff className="size-4" />
             ) : (
               <Eye className="size-4" />
