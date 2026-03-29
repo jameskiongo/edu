@@ -1,7 +1,9 @@
 "use client";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +12,16 @@ import { useLoginForm } from "@/hooks/auth/useLoginForm";
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const formik = useLoginForm();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const message = searchParams.get("message");
+    if (message === "session_expired") {
+      toast.error("Your session has expired. Please log in again.");
+    } else if (message === "auth_required") {
+      toast.info("Please log in to access this page.");
+    }
+  }, [searchParams]);
 
   return (
     <form onSubmit={formik.handleSubmit} className="space-y-6">
