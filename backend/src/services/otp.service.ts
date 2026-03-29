@@ -28,7 +28,7 @@ export class OtpService {
 		userId: number,
 		phoneNumber: string,
 		email: string,
-		purpose: "login" | "verification" | "password_reset" | "password_change",
+		purpose: "login" | "verification" | "password_reset" | "password_change" | "phone_change",
 	): Promise<OTPResult> {
 		const code = this.tokenService.generateOTP();
 		const expiresAt = new Date(
@@ -54,6 +54,7 @@ export class OtpService {
 			const emailSent: boolean = await this.emailService.sendEmailOtp(
 				email,
 				code,
+				purpose,
 			);
 
 			if (emailSent) {
@@ -72,6 +73,29 @@ export class OtpService {
 			throw new BadRequestError("Failed to send OTP via email");
 		}
 
+		if (purpose === "phone_change") {
+			const smsResult: SMSResult = await this.smsService.sendOTPFetch(
+				phoneNumber,
+				code,
+				purpose,
+			);
+
+			if (smsResult.success) {
+				return {
+					success: true,
+					message: "Verification code sent to your new phone number",
+					deliveryMethod: "sms",
+				};
+			}
+
+			await db
+				.update(otpCodes)
+				.set({ used: true })
+				.where(eq(otpCodes.id, otpRecord.id));
+
+			throw new BadRequestError(`Failed to send verification code: ${smsResult.message}`);
+		}
+
 		const user = await db
 			.select()
 			.from(users)
@@ -86,6 +110,7 @@ export class OtpService {
 			const smsResult: SMSResult = await this.smsService.sendOTPFetch(
 				phoneNumber,
 				code,
+				purpose,
 			);
 
 			if (smsResult.success) {
@@ -112,6 +137,7 @@ export class OtpService {
 		const emailSent: boolean = await this.emailService.sendEmailOtp(
 			email,
 			code,
+			purpose,
 		);
 
 		if (emailSent) {
@@ -140,7 +166,8 @@ export class OtpService {
 			| "login"
 			| "verification"
 			| "password_change"
-			| "password_reset" = "login",
+			| "password_reset"
+			| "phone_change" = "login",
 	) {
 		const otpRecord = await db
 			.select()

@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { db } from "../db/db";
 import { studentProfiles, teacherProfiles, users } from "../db/schema";
 import { BadRequestError, NotFoundError } from "../utils/errors";
+import { otpService } from "./otp.service";
 
 export class UserService {
 	async updateProfile(
@@ -9,6 +10,7 @@ export class UserService {
 		data: {
 			firstName?: string;
 			lastName?: string;
+			phoneNumber?: string;
 			image?: string;
 			defaultSmsDelivery?: boolean;
 		},
@@ -37,6 +39,10 @@ export class UserService {
 		}
 		if (data.lastName !== undefined) {
 			updateData.lastName = data.lastName.trim();
+		}
+
+		if (data.phoneNumber !== undefined) {
+			updateData.phoneNumber = data.phoneNumber.trim();
 		}
 
 		if (data.image !== undefined) {
@@ -85,7 +91,6 @@ export class UserService {
 			throw new NotFoundError("User not found");
 		}
 
-		// biome-ignore lint/style/noUnusedTemplateLiteral: <explanation>
 		const { password, failedLoginAttempts, lockUntil, ...safeUser } = user;
 
 		// Clean up profile based on role
@@ -203,6 +208,51 @@ export class UserService {
 				.set(data)
 				.where(eq(studentProfiles.userId, userId));
 		}
+
+		return this.getProfile(userId);
+	}
+
+	async requestPhoneChange(userId: number, newPhoneNumber: string) {
+		const user = await db.query.users.findFirst({
+			where: eq(users.id, userId),
+		});
+
+		if (!user) {
+			throw new NotFoundError("User not found");
+		}
+
+		// Check if the new phone number is already in use
+		const existingUser = await db.query.users.findFirst({
+			where: eq(users.phoneNumber, newPhoneNumber),
+		});
+
+		if (existingUser && existingUser.id !== userId) {
+			throw new BadRequestError("Phone number already in use by another account");
+		}
+
+		return otpService.sendOTP(userId, newPhoneNumber, user.email, "phone_change");
+	}
+
+	async verifyPhoneChange(userId: number, newPhoneNumber: string, code: string) {
+		const user = await db.query.users.findFirst({
+			where: eq(users.id, userId),
+		});
+
+		if (!user) {
+			throw new NotFoundError("User not found");
+		}
+
+		await otpService.verifyOTP(userId, code, "phone_change");
+
+		await db
+			.update(users)
+			.set({
+				phoneNumber: newPhoneNumber,
+				isBlacklisted: false,
+				defaultSmsDelivery: true,
+				updatedAt: new Date(),
+			})
+			.where(eq(users.id, userId));
 
 		return this.getProfile(userId);
 	}
