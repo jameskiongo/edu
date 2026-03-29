@@ -1,5 +1,5 @@
-"use client";
+import { redirect } from "next/navigation";
 
-export default function Dashboard() {
-  return <div className="flex flex-1 flex-col overflow-hidden">app</div>;
+export default function Home() {
+  redirect("/courses");
 }
