@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     const responseData = data.data || data;
 
-    const userId = responseData.userId;
+    const userId = responseData.userId || body.userId;
     const accessToken = responseData.accessToken;
     const refreshToken = responseData.refreshToken;
 
