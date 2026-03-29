@@ -7,6 +7,30 @@ export interface User {
   phoneNumber: string;
   isVerified: boolean;
   isActive: boolean;
+  isBlacklisted: boolean;
+  role: "ADMIN" | "TEACHER" | "STUDENT";
+  defaultSmsDelivery: boolean;
+  teacherProfile?: {
+    bio?: string;
+    specialization?: string;
+    yearsOfExperience?: number;
+    rating?: number;
+    totalReviews?: number;
+    totalStudents?: number;
+    website?: string;
+    twitter?: string;
+    linkedin?: string;
+    github?: string;
+  };
+  studentProfile?: {
+    enrolledCoursesCount?: number;
+    completedCourses?: number;
+    badges?: Array<{
+      id: number;
+      badgeType: string;
+      earnedAt: string;
+    }>;
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -58,6 +82,7 @@ export interface RegisterRequest {
   email: string;
   password: string;
   phoneNumber: string;
+  role?: "STUDENT" | "TEACHER";
 }
 export interface LoginRequest {
   email: string;
