@@ -26,6 +26,8 @@ export default function RootLayout({
     "/register",
     "/verify-register",
     "/verify-login",
+    "/forgot-password",
+    "/reset-password",
   ];
   const showSidebar = !noSidebar.includes(pathname);
   return (
