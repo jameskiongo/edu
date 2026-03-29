@@ -21,7 +21,7 @@ export function VerifyLoginForm() {
     const userId = parseInt(id);
 
     try {
-      const response = await authApi.resendRegisterOTP({
+      const response = await authApi.resendLoginOTP({
         userId,
         purpose: "login",
       });

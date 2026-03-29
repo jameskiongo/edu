@@ -23,7 +23,7 @@ export function VerifyRegisterForm() {
     try {
       const response = await authApi.resendRegisterOTP({
         userId,
-        purpose: "login",
+        purpose: "registration",
       });
       toast.success(response.data.message || "New code sent!");
     } catch (error: any) {
