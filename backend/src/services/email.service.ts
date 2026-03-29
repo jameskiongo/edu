@@ -85,17 +85,38 @@ export class EmailService {
 		});
 	}
 
-	async sendEmailOtp(email: string, code: string): Promise<boolean> {
+	async sendEmailOtp(
+		email: string,
+		code: string,
+		purpose: "login" | "verification" | "password_reset" | "password_change" = "login",
+	): Promise<boolean> {
+		let subject = "Login Verification Code";
+		let title = "Login Verification";
+		let message = "Use the code below to complete your login.";
+
+		if (purpose === "verification") {
+			subject = "Verify Your Email";
+			title = "Verify Your Email";
+			message =
+				"Welcome! Please use the verification code below to activate your account.";
+		} else if (purpose === "password_reset") {
+			subject = "Password Reset Request";
+			title = "Password Reset";
+			message =
+				"You requested to reset your password. Use the code below to continue.";
+		} else if (purpose === "password_change") {
+			subject = "Password Change Verification";
+			title = "Password Change Request";
+			message =
+				"Use the code below to verify your password change request. If you didn't request this, please secure your account.";
+		}
+
 		try {
 			await transporter.sendMail({
 				from: `"MyApp" <${process.env.SMTP_USER}>`,
 				to: email,
-				subject: "Login Verification Code",
-				html: emailTemplate(
-					"Login Verification",
-					"Use the code below to complete your login.",
-					code,
-				),
+				subject,
+				html: emailTemplate(title, message, code),
 			});
 
 			return true;
