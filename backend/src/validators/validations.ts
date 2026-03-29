@@ -138,6 +138,21 @@ export const assignRoleSchema = z.object({
 	role: z.enum(["ADMIN", "TEACHER", "STUDENT"]),
 });
 
+export const toggleUserStatusSchema = z.object({
+	userId: z.coerce.number().int().positive("Valid user ID is required"),
+	isActive: z.boolean(),
+});
+
+export const createCategorySchema = z.object({
+	name: z.string().min(2).max(100),
+	description: z.string().max(500).optional(),
+});
+
+export const updateCategorySchema = z.object({
+	name: z.string().min(2).max(100).optional(),
+	description: z.string().max(500).optional(),
+});
+
 export const updateTeacherProfileSchema = z.object({
 	bio: z.string().max(1000).optional(),
 	specialization: z.string().max(255).optional(),
