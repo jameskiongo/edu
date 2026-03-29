@@ -5,7 +5,9 @@ import type {
   RegisterRequest,
   RegisterResponse,
   TokensResponse,
+  User,
 } from "@/types/auth/auth";
+import type { Category } from "@/types/courses/course";
 
 const API_URL = "/api";
 
@@ -195,4 +197,21 @@ export const userApi = {
     api.post("/users/profile/phone-change", data),
   verifyPhoneChange: (data: { phoneNumber: string; code: string }) =>
     api.post("/users/profile/verify-phone-change", data),
+};
+
+export const adminApi = {
+  // User Management
+  getAllUsers: () => api.get<User[]>("/users"),
+  toggleUserStatus: (data: { userId: number; isActive: boolean }) =>
+    api.patch("/users/status", data),
+  assignRole: (data: { userId: number; role: string }) =>
+    api.patch("/users/role", data),
+
+  // Category Management
+  getAllCategories: () => api.get<Category[]>("/categories"),
+  createCategory: (data: { name: string; description?: string }) =>
+    api.post("/categories", data),
+  updateCategory: (id: number, data: { name?: string; description?: string }) =>
+    api.put(`/categories/${id}`, data),
+  deleteCategory: (id: number) => api.delete(`/categories/${id}`),
 };

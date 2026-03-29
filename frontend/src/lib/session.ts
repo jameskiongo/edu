@@ -15,6 +15,9 @@ export async function createSession(data: Omit<SessionData, "isLoggedIn">) {
   const session = await getSession();
   session.userId = data.userId;
   session.email = data.email;
+  session.firstName = data.firstName;
+  session.lastName = data.lastName;
+  session.role = data.role;
   session.isLoggedIn = true;
   session.accessToken = data.accessToken;
   session.refreshToken = data.refreshToken;

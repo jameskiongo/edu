@@ -1,6 +1,9 @@
 export interface SessionData {
   userId?: number;
   email?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
   isLoggedIn: boolean;
   accessToken?: string;
   refreshToken?: string;

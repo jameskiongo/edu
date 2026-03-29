@@ -23,6 +23,10 @@ export async function POST(request: NextRequest) {
     const userId = responseData.userId || body.userId;
     const accessToken = responseData.accessToken;
     const refreshToken = responseData.refreshToken;
+    const email = responseData.email;
+    const role = responseData.role;
+    const firstName = responseData.firstName;
+    const lastName = responseData.lastName;
 
     if (!userId || !accessToken || !refreshToken) {
       return NextResponse.json(
@@ -35,6 +39,10 @@ export async function POST(request: NextRequest) {
       userId,
       accessToken,
       refreshToken,
+      email,
+      role,
+      firstName,
+      lastName,
     });
 
     return NextResponse.json({
