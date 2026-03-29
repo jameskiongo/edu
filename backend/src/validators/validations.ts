@@ -33,6 +33,15 @@ const otpCodeSchema = z
 	.length(6, "Code must be exactly 6 digits")
 	.regex(/^\d+$/, "Code must contain only numbers");
 
+export const requestPhoneChangeSchema = z.object({
+	phoneNumber: phoneSchema,
+});
+
+export const verifyPhoneChangeSchema = z.object({
+	phoneNumber: phoneSchema,
+	code: otpCodeSchema,
+});
+
 export const requestPasswordChangeSchema = z.object({
 	email: emailSchema,
 	currentPassword: z.string().min(1, "Current password is required"),
@@ -51,9 +60,7 @@ export const registerSchema = z.object({
 	email: emailSchema,
 	password: passwordSchema,
 	phoneNumber: phoneSchema,
-	role: z.enum(["ADMIN", "TEACHER", "STUDENT"], {
-		required_error: "Role is required",
-	}),
+	role: z.enum(["TEACHER", "STUDENT"]).default("STUDENT"),
 });
 
 export const loginSchema = z.object({
@@ -65,6 +72,13 @@ export const updateProfileSchema = z
 	.object({
 		firstName: z.string().optional(),
 		lastName: z.string().optional(),
+		phoneNumber: z
+			.string()
+			.regex(
+				/^\+?[1-9]\d{1,14}$/,
+				"Valid phone number with country code is required (e.g., +1234567890)",
+			)
+			.optional(),
 		image: z
 			.url("Image must be a valid URL")
 			.max(500, "Image URL too long")
@@ -76,11 +90,12 @@ export const updateProfileSchema = z
 		(data) =>
 			data.firstName !== undefined ||
 			data.lastName !== undefined ||
+			data.phoneNumber !== undefined ||
 			data.image !== undefined ||
 			data.defaultSmsDelivery !== undefined,
 		{
 			message:
-				"At least one field (firstName, lastName, image, or defaultSmsDelivery) must be provided",
+				"At least one field (firstName, lastName, phoneNumber, image, or defaultSmsDelivery) must be provided",
 		},
 	);
 
@@ -127,6 +142,11 @@ export const updateTeacherProfileSchema = z.object({
 	bio: z.string().max(1000).optional(),
 	specialization: z.string().max(255).optional(),
 	yearsOfExperience: z.number().int().min(0).optional(),
+	totalReviews: z.number().int().min(0).optional(),
+	website: z.string().url("Must be a valid URL").max(255).optional().or(z.literal("")),
+	twitter: z.string().url("Must be a valid URL").max(255).optional().or(z.literal("")),
+	linkedin: z.string().url("Must be a valid URL").max(255).optional().or(z.literal("")),
+	github: z.string().url("Must be a valid URL").max(255).optional().or(z.literal("")),
 });
 
 export const updateStudentProfileSchema = z.object({});

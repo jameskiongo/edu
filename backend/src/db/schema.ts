@@ -22,6 +22,7 @@ export const otpPurpose = pgEnum("otp_purpose", [
 	"verification",
 	"password_reset",
 	"password_change",
+	"phone_change",
 ]);
 
 export const users = pgTable("users", {
@@ -79,7 +80,12 @@ export const teacherProfiles = pgTable("teacher_profiles", {
 	specialization: varchar("specialization", { length: 255 }),
 	yearsOfExperience: integer("years_of_experience").default(0),
 	rating: decimal("rating", { precision: 3, scale: 2 }).default("0.00"),
+	totalReviews: integer("total_reviews").default(0),
 	totalStudents: integer("total_students").default(0),
+	website: varchar("website", { length: 255 }),
+	twitter: varchar("twitter", { length: 255 }),
+	linkedin: varchar("linkedin", { length: 255 }),
+	github: varchar("github", { length: 255 }),
 });
 
 export const studentProfiles = pgTable("student_profiles", {
