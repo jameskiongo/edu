@@ -16,6 +16,7 @@ export function useAppForm<T extends FormikValues>({
   return useFormik<T>({
     initialValues,
     validationSchema: toFormikValidationSchema(schema),
+    enableReinitialize: true,
     onSubmit,
   });
 }

@@ -18,6 +18,7 @@ export function useRegistrationForm() {
       phoneNumber: "",
       password: "",
       confirmPassword: "",
+      role: "STUDENT",
     },
     schema: registerSchema,
     onSubmit: async (values) => {
