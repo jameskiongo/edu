@@ -47,12 +47,17 @@ export class AuthService {
 		email: string,
 		password: string,
 		phoneNumber: string,
-		role: "ADMIN" | "TEACHER" | "STUDENT",
+		role: "ADMIN" | "TEACHER" | "STUDENT" = "STUDENT",
 	): Promise<{
 		userId: number;
 		message: string;
 		deliveryMethod: "sms" | "email";
 	}> {
+		if (role === "ADMIN") {
+			throw new BadRequestError("Cannot register as an administrator");
+		}
+		const effectiveRole = role || "STUDENT";
+
 		const existingUser = await db
 			.select()
 			.from(users)
@@ -75,14 +80,14 @@ export class AuthService {
 					email,
 					password: hashedPassword,
 					phoneNumber,
-					role,
+					role: effectiveRole,
 					isVerified: false,
 				})
 				.returning();
 
-			if (role === "TEACHER") {
+			if (effectiveRole === "TEACHER") {
 				await tx.insert(teacherProfiles).values({ userId: user.id });
-			} else if (role === "STUDENT") {
+			} else if (effectiveRole === "STUDENT") {
 				await tx.insert(studentProfiles).values({ userId: user.id });
 			}
 
