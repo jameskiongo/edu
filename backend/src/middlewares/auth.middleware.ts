@@ -60,6 +60,42 @@ export const authenticate = async (
 	}
 };
 
+export const optionalAuthenticate = async (
+	req: Request,
+	res: Response,
+	next: NextFunction,
+) => {
+	try {
+		const authHeader = req.headers.authorization;
+
+		if (!authHeader || !authHeader.startsWith("Bearer ")) {
+			return next();
+		}
+
+		const token = authHeader.substring(7);
+		const { userId } = tokenService.verifyAccessToken(token);
+
+		const user = await db.query.users.findFirst({
+			where: eq(users.id, userId),
+			columns: {
+				id: true,
+				role: true,
+				isActive: true,
+			},
+		});
+
+		if (user && user.isActive) {
+			req.userId = user.id;
+			req.userRole = user.role as "ADMIN" | "TEACHER" | "STUDENT";
+		}
+		
+		next();
+	} catch (error) {
+		// Even if token is invalid, we continue as guest
+		next();
+	}
+};
+
 export const authorize = (roles: ("ADMIN" | "TEACHER" | "STUDENT")[]) => {
 	return (req: Request, _: Response, next: NextFunction) => {
 		if (!req.userId || !req.userRole) {
@@ -77,10 +113,13 @@ export const authorize = (roles: ("ADMIN" | "TEACHER" | "STUDENT")[]) => {
 export const validate = (schema: ZodSchema) => {
 	return (req: Request, _: Response, next: NextFunction) => {
 		try {
+			console.log("[Validate] Incoming body:", JSON.stringify(req.body, null, 2));
 			const validatedData = schema.parse(req.body);
+			console.log("[Validate] Success:", JSON.stringify(validatedData, null, 2));
 			req.body = validatedData;
 			next();
 		} catch (error) {
+			console.error("[Validate] Error:", error);
 			if (error instanceof ZodError) {
 				const messages = error.issues.map((err: ZodIssue) => ({
 					field: err.path.join("."),
