@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { useUser } from "@/hooks/auth/useAuth";
 import { cn } from "@/lib/utils";
+import { ReviewSection } from "@/components/courses/ReviewSection";
 
 export default function CourseDetailPage() {
   const params = useParams();
@@ -278,6 +279,17 @@ export default function CourseDetailPage() {
                         })}
                     </div>
                 </section>
+
+                <Separator />
+
+                {/* Reviews Section */}
+                <ReviewSection 
+                    courseId={Number(id)} 
+                    isEnrolled={isEnrolled} 
+                    userId={user?.id}
+                />
+
+                <Separator />
 
                 {/* Instructor Section */}
                 <section className="space-y-6 pt-4">
