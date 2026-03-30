@@ -39,11 +39,11 @@ export default function RootLayout({
       <body className="h-screen flex flex-col font-sans antialiased">
         <div className="flex flex-1 overflow-hidden">
           {showSidebar && (
-            <div className="hidden sticky top-0 lg:block">
+            <div className="hidden sticky top-0 lg:block z-50 overflow-visible">
               <Sidebar />
             </div>
           )}
-          <div className="flex flex-1 flex-col overflow-auto">{children}</div>
+          <div className="flex flex-1 flex-col overflow-auto relative z-0">{children}</div>
           <Toaster position="top-center" />
         </div>
       </body>

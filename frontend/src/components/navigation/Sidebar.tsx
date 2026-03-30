@@ -44,6 +44,10 @@ const adminItems = [
   { icon: Layers, label: "Manage Categories", href: "/dashboard/admin/categories" },
 ];
 
+const teacherItems = [
+  { icon: BookOpen, label: "Manage Courses", href: "/dashboard/teacher/courses" },
+];
+
 export function Sidebar() {
   const { user, logout, isLoading } = useUser();
   const pathname = usePathname();
@@ -52,10 +56,26 @@ export function Sidebar() {
   return (
     <div
       className={cn(
-        "relative flex h-screen flex-col border-r border-border bg-sidebar transition-all duration-300",
+        "relative z-40 flex h-screen flex-col border-r border-border bg-sidebar transition-all duration-300 overflow-visible",
         collapsed ? "w-20" : "w-64",
       )}
     >
+      {/* Collapse Toggle Button - Positioned to overlap the border */}
+      <div className="absolute -right-4 top-20 z-[100]">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={() => setCollapsed(!collapsed)}
+          className={cn(
+            "flex size-8 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm hover:text-foreground transition-transform duration-300",
+            collapsed && "rotate-180",
+          )}
+        >
+          <ChevronLeft className="size-4" />
+        </Button>
+      </div>
+
       <div
         className={cn(
           "flex h-16 items-center border-b border-border transition-all duration-300",
@@ -73,19 +93,6 @@ export function Sidebar() {
           )}
         </div>
       </div>
-
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        onClick={() => setCollapsed(!collapsed)}
-        className={cn(
-          "absolute -right-4 top-20 z-10 flex size-8 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm hover:text-foreground",
-          collapsed && "rotate-180",
-        )}
-      >
-        <ChevronLeft className="size-4" />
-      </Button>
 
       <nav className="flex-1 space-y-1 p-3">
         {navItems.map((item) => {
@@ -119,6 +126,36 @@ export function Sidebar() {
         )}
 
         {user?.role === "ADMIN" && adminItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.label}
+              href={item.href}
+              className={cn(
+                "flex w-full items-center rounded-lg transition-colors",
+                collapsed ? "justify-center px-0 py-2.5" : "gap-3 px-3 py-2.5",
+                isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+              )}
+            >
+              <item.icon className="size-5 shrink-0" />
+              {!collapsed && (
+                <span className="truncate text-sm font-medium animate-in fade-in duration-300">
+                  {item.label}
+                </span>
+              )}
+            </Link>
+          );
+        })}
+
+        {!collapsed && (user?.role === "TEACHER" || user?.role === "ADMIN") && (
+          <div className="px-3 pt-4 pb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Instructor Panel
+          </div>
+        )}
+
+        {(user?.role === "TEACHER" || user?.role === "ADMIN") && teacherItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link
