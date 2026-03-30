@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import useSWR from "swr";
+import useSWR, { mutate as globalMutate } from "swr";
 
 export default function LearningDashboard() {
   const params = useParams();
@@ -80,9 +80,12 @@ export default function LearningDashboard() {
         isCompleted: !isCompleted 
       });
       
-      // Refresh progress data
+      // Refresh local data
       mutateLessonProgress();
       mutateEnrollment();
+      
+      // Refresh sidebar progress
+      globalMutate("/courses/enrolled");
       
       toast.success(!isCompleted ? "Lesson completed!" : "Lesson marked as incomplete");
     } catch (error: any) {

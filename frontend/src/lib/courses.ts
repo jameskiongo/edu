@@ -10,3 +10,13 @@ export async function getCourses(params?: { limit?: number; offset?: number }): 
     throw error;
   }
 }
+
+export async function getEnrolledCourses(): Promise<Course[]> {
+  try {
+    const response = await api.get("/courses/enrolled");
+    return response.data.data || response.data;
+  } catch (error) {
+    console.error("Failed to fetch enrolled courses:", error);
+    throw error;
+  }
+}
