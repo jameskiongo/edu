@@ -160,6 +160,17 @@ export const changePasswordSchema = z
     path: ["confirmPassword"],
   });
 
+export const courseSchema = z.object({
+  title: z.string().min(3, "Title must be at least 3 characters").max(255),
+  description: z
+    .string()
+    .min(10, "Description must be at least 10 characters")
+    .max(2000),
+  categoryId: z.string().min(1, "Please select a category"),
+  level: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"]),
+  price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
+});
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type OtpInput = z.infer<typeof otpSchema>;
