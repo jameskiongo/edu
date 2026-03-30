@@ -98,6 +98,26 @@ export class CourseController extends BaseController {
 		return this.sendResponse(res, result, "Progress updated successfully");
 	};
 
+	getCourseReviews = async (req: Request, res: Response) => {
+		const reviews = await this.courseService.getCourseReviews(
+			Number(req.params.id),
+		);
+		return this.sendResponse(res, reviews);
+	};
+
+	createReview = async (req: Request, res: Response) => {
+		if (!req.userId) {
+			throw new BadRequestError("User ID is required");
+		}
+
+		const review = await this.courseService.createReview(
+			req.userId,
+			Number(req.params.id),
+			req.body,
+		);
+		return this.sendResponse(res, review, "Review submitted successfully", 201);
+	};
+
 	uploadThumbnail = async (req: Request, res: Response) => {
 		if (!req.file) {
 			throw new BadRequestError("No file uploaded");

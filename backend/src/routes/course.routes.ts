@@ -22,11 +22,17 @@ const updateCourseSchema = createCourseSchema.partial().extend({
 	thumbnailUrl: z.string().optional(),
 });
 
+const createReviewSchema = z.object({
+	rating: z.number().min(1).max(5),
+	comment: z.string().max(1000).optional(),
+});
+
 // Public routes
 router.get("/", optionalAuthenticate, courseController.getAllCourses);
 router.get("/:id", courseController.getCourseById);
 router.get("/:id/enrollment-status", authenticate, courseController.checkEnrollmentStatus);
 router.get("/:id/progress", authenticate, courseController.getCourseProgress);
+router.get("/:id/reviews", courseController.getCourseReviews);
 router.post("/lessons/:lessonId/progress", authenticate, courseController.updateLessonProgress);
 
 // Instructor/Admin routes
@@ -36,6 +42,13 @@ router.post(
 	"/:id/enroll",
 	authenticate,
 	courseController.enroll,
+);
+
+router.post(
+	"/:id/reviews",
+	authenticate,
+	validate(createReviewSchema),
+	courseController.createReview,
 );
 router.get(
 	"/teacher/my-courses",

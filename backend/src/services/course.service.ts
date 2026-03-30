@@ -1,6 +1,6 @@
 import { and, eq, sql, inArray } from "drizzle-orm";
 import { db } from "../db/db";
-import { courses, enrollments, studentProfiles, studentBadges, lessonProgress, sections, lessons } from "../db/schema";
+import { courses, enrollments, studentProfiles, studentBadges, lessonProgress, sections, lessons, courseReviews } from "../db/schema";
 import { BadRequestError, NotFoundError } from "../utils/errors";
 
 export class CourseService {
@@ -321,6 +321,79 @@ export class CourseService {
 			);
 
 		return { progressPercent, isCompleted };
+	}
+
+	async getCourseReviews(courseId: number) {
+		return db.query.courseReviews.findMany({
+			where: eq(courseReviews.courseId, courseId),
+			with: {
+				student: {
+					columns: {
+						firstName: true,
+						lastName: true,
+						image: true,
+					},
+				},
+			},
+			orderBy: (reviews, { desc }) => [desc(reviews.createdAt)],
+		});
+	}
+
+	async createReview(studentId: number, courseId: number, data: { rating: number; comment?: string }) {
+		// Check enrollment
+		const enrollment = await this.checkEnrollment(studentId, courseId);
+		if (!enrollment) {
+			throw new BadRequestError("You must be enrolled in this course to leave a review");
+		}
+
+		// Check if already reviewed
+		const existingReview = await db.query.courseReviews.findFirst({
+			where: and(
+				eq(courseReviews.studentId, studentId),
+				eq(courseReviews.courseId, courseId),
+			),
+		});
+
+		if (existingReview) {
+			throw new BadRequestError("You have already reviewed this course");
+		}
+
+		if (data.rating < 1 || data.rating > 5) {
+			throw new BadRequestError("Rating must be between 1 and 5");
+		}
+
+		return await db.transaction(async (tx) => {
+			// Create review
+			const [review] = await tx
+				.insert(courseReviews)
+				.values({
+					studentId,
+					courseId,
+					rating: data.rating,
+					comment: data.comment,
+				})
+				.returning();
+
+			// Recalculate course rating
+			const allReviews = await tx.query.courseReviews.findMany({
+				where: eq(courseReviews.courseId, courseId),
+			});
+
+			const totalReviews = allReviews.length;
+			const averageRating = (
+				allReviews.reduce((acc, r) => acc + r.rating, 0) / totalReviews
+			).toFixed(2);
+
+			await tx
+				.update(courses)
+				.set({
+					averageRating,
+					totalReviews,
+				})
+				.where(eq(courses.id, courseId));
+
+			return review;
+		});
 	}
 }
 
