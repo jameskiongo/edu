@@ -21,12 +21,19 @@ export function CourseGrid({
 }: CourseGridProps) {
   const getKey = (pageIndex: number, previousPageData: Course[]) => {
     if (previousPageData && !previousPageData.length) return null;
-    return { key: "courses", limit: PAGE_SIZE, offset: pageIndex * PAGE_SIZE };
+    return { 
+      key: "courses", 
+      limit: PAGE_SIZE, 
+      offset: pageIndex * PAGE_SIZE,
+      search: searchQuery || undefined,
+      categoryIds: selectedCategories.length > 0 ? selectedCategories.map(Number) : undefined,
+      levels: selectedLevels.length > 0 ? selectedLevels : undefined
+    };
   };
 
   const { data, size, setSize, isLoading, isValidating } = useSWRInfinite(
     getKey,
-    async ({ limit, offset }) => getCourses({ limit, offset })
+    async (params) => getCourses(params)
   );
 
   const courses = data ? data.flat() : [];
@@ -43,23 +50,6 @@ export function CourseGrid({
     );
   }
 
-  const filteredCourses = courses.filter((course) => {
-    const matchesSearch = course.title
-      ?.toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    
-    // selectedCategories contains category names from the filter
-    const matchesCategory =
-      selectedCategories.length === 0 ||
-      selectedCategories.includes(course.category?.name ?? "");
-      
-    const matchesLevel =
-      selectedLevels.length === 0 ||
-      selectedLevels.includes(course.level ?? "");
-
-    return matchesSearch && matchesCategory && matchesLevel;
-  });
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -68,14 +58,14 @@ export function CourseGrid({
             Explore Courses
           </h1>
           <p className="text-muted-foreground">
-            {filteredCourses.length} courses available
+            {courses.length} courses available
           </p>
         </div>
       </div>
 
-      {filteredCourses.length > 0 ? (
+      {courses.length > 0 ? (
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {filteredCourses.map((course) => (
+          {courses.map((course) => (
             <CourseCard key={course.id} course={course} />
           ))}
         </div>
@@ -94,7 +84,7 @@ export function CourseGrid({
         </div>
       )}
 
-      {filteredCourses.length > 0 && (
+      {courses.length > 0 && (
         <div className="flex flex-col items-center gap-4 pt-10 pb-6">
           {!isReachingEnd ? (
             <Button 
