@@ -38,8 +38,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: CompassIcon, label: "Browse Courses", href: "/courses" },
-  { icon: Calendar, label: "Schedule", href: "#" },
-  { icon: Trophy, label: "Certificates", href: "#" },
 ];
 
 const adminItems = [
@@ -154,13 +152,13 @@ export function Sidebar() {
                           <div className="absolute -bottom-1 -right-1 size-1.5 rounded-full bg-emerald-500 ring-1 ring-background" />
                         )}
                       </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="truncate text-xs font-semibold leading-none mb-1">
+                      <div className="flex flex-col flex-1 min-w-0">
+                        <span className="truncate text-[11px] font-bold leading-none mb-1.5">
                           {course.title}
                         </span>
-                        <div className="h-0.5 w-16 bg-muted rounded-full overflow-hidden">
+                        <div className="h-1 w-full bg-secondary rounded-full overflow-hidden">
                           <div 
-                            className="h-full bg-primary/40 transition-all duration-500"
+                            className="h-full bg-primary/60 transition-all duration-700 ease-out rounded-full"
                             style={{ width: `${course.enrollment?.progressPercent || 0}%` }}
                           />
                         </div>
