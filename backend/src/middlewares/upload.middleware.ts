@@ -24,7 +24,7 @@ const storage = multer.diskStorage({
 	},
 });
 
-const fileFilter = (
+const imageFilter = (
 	_req: Request,
 	file: Express.Multer.File,
 	cb: multer.FileFilterCallback,
@@ -39,10 +39,39 @@ const fileFilter = (
 	}
 };
 
-export const upload = multer({
+const contentFilter = (
+	_req: Request,
+	file: Express.Multer.File,
+	cb: multer.FileFilterCallback,
+) => {
+	const allowedTypes = [
+		"video/mp4",
+		"video/webm",
+		"video/ogg",
+		"application/pdf",
+		"application/zip",
+		"application/msword",
+		"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+	];
+	if (allowedTypes.includes(file.mimetype)) {
+		cb(null, true);
+	} else {
+		cb(new Error("Invalid file type. Only MP4, WEBM, PDF, ZIP and Word docs are allowed."));
+	}
+};
+
+export const uploadImage = multer({
 	storage,
-	fileFilter,
+	fileFilter: imageFilter,
 	limits: {
 		fileSize: 5 * 1024 * 1024, // 5MB limit
+	},
+});
+
+export const uploadContent = multer({
+	storage,
+	fileFilter: contentFilter,
+	limits: {
+		fileSize: 100 * 1024 * 1024, // 100MB limit
 	},
 });

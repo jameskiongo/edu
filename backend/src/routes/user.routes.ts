@@ -6,7 +6,7 @@ import {
 	authorize,
 	validate,
 } from "../middlewares/auth.middleware";
-import { upload } from "../middlewares/upload.middleware";
+import { uploadImage } from "../middlewares/upload.middleware";
 import {
 	assignRoleSchema,
 	toggleUserStatusSchema,
@@ -42,7 +42,7 @@ router.get(
 router.post(
 	"/profile/image",
 	authenticate,
-	upload.single("image"),
+	uploadImage.single("image"),
 	catchAsync(userController.uploadImage),
 );
 
