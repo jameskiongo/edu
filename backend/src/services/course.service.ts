@@ -56,19 +56,32 @@ export class CourseService {
 	}
 
 	async getAllCourses(filters: {
-		categoryId?: number;
-		level?: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
+		categoryIds?: number[];
+		levels?: ("BEGINNER" | "INTERMEDIATE" | "ADVANCED")[];
 		status?: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+		search?: string;
 		limit?: number;
 		offset?: number;
 		studentId?: number;
 	}) {
 		const coursesList = await db.query.courses.findMany({
-			where: (courses, { eq, and }) => {
+			where: (courses, { eq, and, or, ilike, inArray }) => {
 				const conditions = [];
-				if (filters.categoryId) conditions.push(eq(courses.categoryId, filters.categoryId));
-				if (filters.level) conditions.push(eq(courses.level, filters.level));
+				if (filters.categoryIds && filters.categoryIds.length > 0) {
+					conditions.push(inArray(courses.categoryId, filters.categoryIds));
+				}
+				if (filters.levels && filters.levels.length > 0) {
+					conditions.push(inArray(courses.level, filters.levels));
+				}
 				if (filters.status) conditions.push(eq(courses.status, filters.status));
+				if (filters.search) {
+					conditions.push(
+						or(
+							ilike(courses.title, `%${filters.search}%`),
+							ilike(courses.description, `%${filters.search}%`),
+						),
+					);
+				}
 				return conditions.length > 0 ? and(...conditions) : undefined;
 			},
 			limit: filters.limit,

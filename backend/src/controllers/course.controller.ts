@@ -23,11 +23,18 @@ export class CourseController extends BaseController {
 	};
 
 	getAllCourses = async (req: Request, res: Response) => {
-		const { categoryId, level, status, limit, offset } = req.query;
+		const { categoryIds, levels, status, limit, offset, search } = req.query;
+		
+		const parseArray = (val: any) => {
+			if (!val) return undefined;
+			return Array.isArray(val) ? val : [val];
+		};
+
 		const courses = await this.courseService.getAllCourses({
-			categoryId: categoryId ? Number(categoryId) : undefined,
-			level: level as any,
+			categoryIds: parseArray(categoryIds)?.map(Number),
+			levels: parseArray(levels) as any,
 			status: (status as any) || "PUBLISHED",
+			search: search as string,
 			limit: limit ? Number(limit) : undefined,
 			offset: offset ? Number(offset) : undefined,
 			studentId: req.userId,
