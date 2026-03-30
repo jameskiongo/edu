@@ -1,16 +1,8 @@
 "use client";
 
-import { Grid3X3, LayoutList } from "lucide-react";
-import useSWR from "swr";
+import { Grid3X3, Loader2 } from "lucide-react";
+import useSWRInfinite from "swr/infinite";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getCourses } from "@/lib/courses";
 import { type Course, CourseCard } from "./CourseCard";
 
@@ -20,19 +12,47 @@ interface CourseGridProps {
   selectedLevels: string[];
 }
 
+const PAGE_SIZE = 6;
+
 export function CourseGrid({
   searchQuery,
   selectedCategories,
   selectedLevels,
 }: CourseGridProps) {
-  const { data: courses = [], isLoading } = useSWR("courses", getCourses);
+  const getKey = (pageIndex: number, previousPageData: Course[]) => {
+    if (previousPageData && !previousPageData.length) return null;
+    return { key: "courses", limit: PAGE_SIZE, offset: pageIndex * PAGE_SIZE };
+  };
+
+  const { data, size, setSize, isLoading, isValidating } = useSWRInfinite(
+    getKey,
+    async ({ limit, offset }) => getCourses({ limit, offset })
+  );
+
+  const courses = data ? data.flat() : [];
+  const isReachingEnd = 
+    data && (data[data.length - 1]?.length < PAGE_SIZE);
+
+  if (isLoading && !data) {
+    return (
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="h-[300px] rounded-xl bg-muted animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
   const filteredCourses = courses.filter((course) => {
     const matchesSearch = course.title
       ?.toLowerCase()
       .includes(searchQuery.toLowerCase());
+    
+    // selectedCategories contains category names from the filter
     const matchesCategory =
       selectedCategories.length === 0 ||
-      selectedCategories.includes(course.category ?? "");
+      selectedCategories.includes(course.category?.name ?? "");
+      
     const matchesLevel =
       selectedLevels.length === 0 ||
       selectedLevels.includes(course.level ?? "");
@@ -50,42 +70,6 @@ export function CourseGrid({
           <p className="text-muted-foreground">
             {filteredCourses.length} courses available
           </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Tabs defaultValue="all" className="hidden sm:block">
-            <TabsList className="bg-secondary">
-              <TabsTrigger value="all">All Courses</TabsTrigger>
-              <TabsTrigger value="enrolled">My Courses</TabsTrigger>
-              <TabsTrigger value="saved">Saved</TabsTrigger>
-            </TabsList>
-          </Tabs>
-
-          <Select defaultValue="popular">
-            <SelectTrigger className="w-40 bg-secondary/50 border-border">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="popular">Most Popular</SelectItem>
-              <SelectItem value="newest">Newest</SelectItem>
-              <SelectItem value="rating">Highest Rated</SelectItem>
-              <SelectItem value="price-low">Price: Low to High</SelectItem>
-              <SelectItem value="price-high">Price: High to Low</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <div className="hidden lg:flex items-center border border-border rounded-lg overflow-hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-none bg-primary/10"
-            >
-              <Grid3X3 className="size-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="rounded-none">
-              <LayoutList className="size-4" />
-            </Button>
-          </div>
         </div>
       </div>
 
@@ -111,10 +95,32 @@ export function CourseGrid({
       )}
 
       {filteredCourses.length > 0 && (
-        <div className="flex justify-center pt-6">
-          <Button variant="outline" size="lg" className="min-w-48">
-            Load More Courses
-          </Button>
+        <div className="flex flex-col items-center gap-4 pt-10 pb-6">
+          {!isReachingEnd ? (
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="min-w-48 font-semibold border-2"
+              onClick={() => setSize(size + 1)}
+              disabled={isValidating}
+            >
+              {isValidating ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                "Load More Courses"
+              )}
+            </Button>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <div className="h-px w-24 bg-border" />
+              <p className="text-sm text-muted-foreground font-medium">
+                You've reached the end of the catalog
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
