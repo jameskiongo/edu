@@ -339,6 +339,38 @@ export class CourseService {
 		});
 	}
 
+	async getEnrolledCourses(studentId: number) {
+		const enrolled = await db.query.enrollments.findMany({
+			where: eq(enrollments.studentId, studentId),
+			with: {
+				course: {
+					with: {
+						teacher: {
+							columns: {
+								firstName: true,
+								lastName: true,
+								image: true,
+							},
+						},
+						category: true,
+					},
+				},
+			},
+			orderBy: (enrollments, { desc }) => [desc(enrollments.enrolledAt)],
+		});
+
+		return enrolled.map((e) => ({
+			...e.course,
+			isEnrolled: true,
+			enrollment: {
+				id: e.id,
+				enrolledAt: e.enrolledAt,
+				progressPercent: e.progressPercent,
+				completedAt: e.completedAt,
+			},
+		}));
+	}
+
 	async createReview(studentId: number, courseId: number, data: { rating: number; comment?: string }) {
 		// Check enrollment
 		const enrollment = await this.checkEnrollment(studentId, courseId);

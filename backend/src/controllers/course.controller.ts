@@ -60,6 +60,15 @@ export class CourseController extends BaseController {
 		return this.sendResponse(res, enrollment, "Successfully enrolled in course", 201);
 	};
 
+	getEnrolledCourses = async (req: Request, res: Response) => {
+		if (!req.userId) {
+			throw new BadRequestError("User ID is required");
+		}
+
+		const courses = await this.courseService.getEnrolledCourses(req.userId);
+		return this.sendResponse(res, courses);
+	};
+
 	checkEnrollmentStatus = async (req: Request, res: Response) => {
 		if (!req.userId) {
 			return this.sendResponse(res, { isEnrolled: false });

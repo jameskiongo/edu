@@ -29,6 +29,7 @@ const createReviewSchema = z.object({
 
 // Public routes
 router.get("/", optionalAuthenticate, courseController.getAllCourses);
+router.get("/enrolled", authenticate, courseController.getEnrolledCourses);
 router.get("/:id", courseController.getCourseById);
 router.get("/:id/enrollment-status", authenticate, courseController.checkEnrollmentStatus);
 router.get("/:id/progress", authenticate, courseController.getCourseProgress);
